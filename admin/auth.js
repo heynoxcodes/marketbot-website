@@ -775,16 +775,80 @@ class SecureAdminSystem {
                 updated_by: 'Admin'
             };
             
-            // Save to global maintenance file (this would ideally be server-side)
-            // For now, we'll use a combination of localStorage and file-based approach
             console.log('Updating global maintenance status:', maintenanceData);
             
-            // Store globally accessible data
+            // Update the live maintenance-status.json file via GitHub API
+            await this.updateMaintenanceFile(maintenanceData);
+            
+            // Also store locally for immediate feedback
             localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
             
             return true;
         } catch (error) {
             console.error('Failed to update global maintenance status:', error);
+            throw error;
+        }
+    }
+    
+    async updateMaintenanceFile(data) {
+        try {
+            const fileContent = JSON.stringify(data, null, 2);
+            const encodedContent = btoa(fileContent);
+            
+            // GitHub API details
+            const GITHUB_TOKEN = 'ghp_wcgVKS1TkJaGkPdyh6vFWGkmD7kCKF4FGSJP';
+            const REPO_OWNER = 'heynoxcodes';
+            const REPO_NAME = 'marketbot-website';
+            const FILE_PATH = 'maintenance-status.json';
+            
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            
+            // Get current file SHA
+            let sha = null;
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const fileData = await response.json();
+                    sha = fileData.sha;
+                }
+            } catch (error) {
+                console.warn('Could not get current file SHA:', error);
+            }
+            
+            // Update file
+            const updateData = {
+                message: `Update global maintenance status: ${data.maintenance_enabled ? 'ENABLED' : 'DISABLED'}`,
+                content: encodedContent
+            };
+            
+            if (sha) {
+                updateData.sha = sha;
+            }
+            
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            }
+            
+            console.log('Global maintenance file updated successfully');
+            return true;
+            
+        } catch (error) {
+            console.error('Failed to update maintenance file:', error);
             throw error;
         }
     }
