@@ -579,6 +579,7 @@ class SecureAdminSystem {
         
         this.updateAnalytics();
         this.loadActiveAnnouncements();
+        this.updateMaintenanceStatus();
         
         // Removed the unwanted blue notification banner - no automatic notifications
     }
@@ -709,9 +710,69 @@ class SecureAdminSystem {
         alert('Server Analytics:\n\nTotal orders: 87\nRevenue this month: $2,847\nTop selling products: Digital templates\nUser retention: 78%');
     }
 
-    maintenanceMode() {
-        if (confirm('Are you sure you want to enter maintenance mode? This will affect all users.')) {
-            alert('Maintenance mode activated. All users will see a maintenance message.');
+    async maintenanceMode() {
+        const isCurrentlyInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
+        const action = isCurrentlyInMaintenance ? 'disable' : 'enable';
+        
+        if (confirm(`Are you sure you want to ${action} maintenance mode? This will affect all users.`)) {
+            try {
+                if (isCurrentlyInMaintenance) {
+                    // Disable maintenance mode
+                    localStorage.removeItem('marketbot_maintenance_mode');
+                    localStorage.removeItem('marketbot_maintenance_message');
+                    
+                    // Broadcast to all tabs
+                    if (window.BroadcastChannel) {
+                        const channel = new BroadcastChannel('marketbot_maintenance');
+                        channel.postMessage({
+                            type: 'maintenance_disabled',
+                            timestamp: Date.now()
+                        });
+                    }
+                    
+                    alert('✅ Maintenance mode disabled. Website is now accessible to all users.');
+                } else {
+                    // Enable maintenance mode
+                    const customMessage = prompt('Enter maintenance message (or press OK for default):', 
+                        'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!');
+                    
+                    if (customMessage !== null) {
+                        localStorage.setItem('marketbot_maintenance_mode', 'true');
+                        localStorage.setItem('marketbot_maintenance_message', customMessage || 'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!');
+                        localStorage.setItem('marketbot_maintenance_start', new Date().toISOString());
+                        
+                        // Broadcast to all tabs
+                        if (window.BroadcastChannel) {
+                            const channel = new BroadcastChannel('marketbot_maintenance');
+                            channel.postMessage({
+                                type: 'maintenance_enabled',
+                                message: customMessage,
+                                timestamp: Date.now()
+                            });
+                        }
+                        
+                        alert('🔧 Maintenance mode activated. All users will see the maintenance page.');
+                    }
+                }
+                
+                // Update dashboard to reflect current state
+                this.updateMaintenanceStatus();
+                
+            } catch (error) {
+                console.error('Error toggling maintenance mode:', error);
+                alert('❌ Error toggling maintenance mode. Please try again.');
+            }
+        }
+    }
+    
+    updateMaintenanceStatus() {
+        const isInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
+        const statusElement = document.getElementById('maintenanceStatus');
+        
+        if (statusElement) {
+            statusElement.innerHTML = isInMaintenance ? 
+                '<span style="color: #f44336;">🔧 Maintenance Mode Active</span>' : 
+                '<span style="color: #4CAF50;">✅ Site Operational</span>';
         }
     }
 }
