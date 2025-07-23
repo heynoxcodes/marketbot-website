@@ -58,7 +58,7 @@
                     </div>
                 </div>
 
-                <button onclick="publishAnnouncement()" class="btn btn-primary">Publish Global Announcement</button>
+                <button onclick="window.publishAnnouncement()" class="btn btn-primary">Publish Global Announcement</button>
                 
                 <div id="publishMessage" class="success-message" style="display: none;">
                     Announcement published successfully!
@@ -415,17 +415,36 @@
             // Try multiple methods to create announcement
             let announcement;
             
-            if (window.trueGlobalStorage) {
-                console.log('Using trueGlobalStorage');
-                announcement = await window.trueGlobalStorage.createAnnouncement(text, type, author, duration);
-            } else if (window.parent.globalAnnouncements) {
-                console.log('Using parent globalAnnouncements');
-                announcement = await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
-            } else if (window.globalAnnouncements) {
-                console.log('Using window globalAnnouncements');
-                announcement = await window.globalAnnouncements.createAnnouncement(text, type, author, duration);
-            } else {
-                throw new Error('No announcement system available');
+            // Use direct localStorage approach for GitHub Pages
+            console.log('Creating announcement with localStorage approach');
+            
+            const announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
+            const existingIndex = announcements.findIndex(ann => ann.author === author);
+            
+            if (existingIndex !== -1) {
+                throw new Error('You already have an active announcement. Please remove it first.');
+            }
+
+            announcement = {
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                text: text,
+                type: type,
+                author: author,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
+            };
+
+            announcements.push(announcement);
+            localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
+            
+            // Broadcast to all tabs
+            if (window.BroadcastChannel) {
+                const channel = new BroadcastChannel('marketbot_announcements');
+                channel.postMessage({
+                    type: 'announcement_update',
+                    announcements: announcements,
+                    timestamp: Date.now()
+                });
             }
             
             console.log('Announcement created:', announcement);
@@ -459,16 +478,18 @@
         try {
             let announcements = [];
             
-            // Try multiple sources for announcements
-            if (window.trueGlobalStorage) {
-                console.log('Loading from trueGlobalStorage');
-                announcements = await window.trueGlobalStorage.fetchAllAnnouncements();
-            } else if (window.parent.globalAnnouncements) {
-                console.log('Loading from parent globalAnnouncements');
-                announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
-            } else if (window.globalAnnouncements) {
-                console.log('Loading from window globalAnnouncements');
-                announcements = await window.globalAnnouncements.fetchAnnouncements();
+            // Load from localStorage directly
+            console.log('Loading announcements from localStorage');
+            const stored = localStorage.getItem('marketbot_global_announcements');
+            announcements = stored ? JSON.parse(stored) : [];
+            
+            // Filter expired announcements
+            const now = new Date();
+            announcements = announcements.filter(ann => new Date(ann.expiresAt) > now);
+            
+            // Save cleaned list if anything was removed
+            if (stored && announcements.length !== JSON.parse(stored).length) {
+                localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
             }
             
             console.log('Loaded announcements:', announcements);
@@ -489,7 +510,7 @@
                         Author: ${ann.author}
                     </div>
                     <div>${ann.text}</div>
-                    <button onclick="removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
+                    <button onclick="window.removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
                 </div>
             `).join('');
         } catch (error) {
@@ -500,11 +521,34 @@
 
     window.removeAnnouncement = async function removeAnnouncement(id) {
         try {
-            await window.parent.globalAnnouncements.deleteAnnouncement(id);
-            showSuccess('Announcement removed successfully!');
-            loadActiveAnnouncements();
+            console.log('Removing announcement:', id);
+            
+            let announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
+            const originalLength = announcements.length;
+            
+            announcements = announcements.filter(ann => ann.id !== id);
+            localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
+            
+            // Broadcast removal to all tabs
+            if (window.BroadcastChannel) {
+                const channel = new BroadcastChannel('marketbot_announcements');
+                channel.postMessage({
+                    type: 'announcement_update',
+                    announcements: announcements,
+                    timestamp: Date.now()
+                });
+            }
+            
+            if (announcements.length < originalLength) {
+                window.showSuccess('Announcement removed successfully!');
+            } else {
+                window.showError('Announcement not found');
+            }
+            
+            window.loadActiveAnnouncements();
         } catch (error) {
-            showError('Failed to remove announcement: ' + error.message);
+            console.error('Remove announcement error:', error);
+            window.showError('Failed to remove announcement: ' + error.message);
         }
     }
 
@@ -548,20 +592,43 @@
         `;
     }
 
-    // Auto-update preview when typing
+    // Initialize dashboard when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-        const textInput = document.getElementById('announcementText');
-        const typeSelect = document.getElementById('announcementType');
-        const authorInput = document.getElementById('authorName');
+        console.log('Dashboard DOM loaded, initializing...');
+        
+        setTimeout(() => {
+            // Setup preview functionality
+            const textInput = document.getElementById('announcementText');
+            const typeSelect = document.getElementById('announcementType');
+            const authorInput = document.getElementById('authorName');
 
-        if (textInput) textInput.addEventListener('input', updatePreview);
-        if (typeSelect) typeSelect.addEventListener('change', updatePreview);
-        if (authorInput) authorInput.addEventListener('input', updatePreview);
+            console.log('Setting up event listeners...');
+            console.log('textInput:', !!textInput, 'typeSelect:', !!typeSelect, 'authorInput:', !!authorInput);
 
-        // Initialize preview
-        updatePreview();
+            if (textInput) {
+                textInput.addEventListener('input', window.updatePreview);
+                console.log('Added input listener to text');
+            }
+            if (typeSelect) {
+                typeSelect.addEventListener('change', window.updatePreview);
+                console.log('Added change listener to type');
+            }
+            if (authorInput) {
+                authorInput.addEventListener('input', window.updatePreview);
+                console.log('Added input listener to author');
+            }
 
-        // Load active announcements
-        loadActiveAnnouncements();
+            // Initialize preview
+            if (window.updatePreview) {
+                window.updatePreview();
+                console.log('Initial preview updated');
+            }
+
+            // Load active announcements
+            if (window.loadActiveAnnouncements) {
+                window.loadActiveAnnouncements();
+                console.log('Loading active announcements');
+            }
+        }, 100);
     });
 </script>
