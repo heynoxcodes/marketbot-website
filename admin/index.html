@@ -294,85 +294,102 @@
             `;
         }
 
-        function publishAnnouncement() {
+        async function publishAnnouncement() {
             const text = document.getElementById('announcementText').value.trim();
             const type = document.getElementById('announcementType').value;
             const duration = parseInt(document.getElementById('duration').value);
             const author = document.getElementById('authorName').value.trim();
 
             if (!text || !author) {
-                alert('Please fill in all required fields');
+                showError('Please fill in all required fields');
                 return;
             }
 
             if (duration < 1 || duration > 168) {
-                alert('Duration must be between 1 and 168 hours');
+                showError('Duration must be between 1 and 168 hours');
                 return;
             }
 
-            const announcement = {
-                id: Date.now(),
-                text: text,
-                type: type,
-                author: author,
-                createdAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
-            };
-
-            // Save to localStorage
-            let announcements = JSON.parse(localStorage.getItem('marketbot_announcements') || '[]');
-            announcements.push(announcement);
-            localStorage.setItem('marketbot_announcements', JSON.stringify(announcements));
-
-            // Clear form
-            document.getElementById('announcementText').value = '';
-            document.getElementById('authorName').value = '';
-            
-            // Show success message
-            const msg = document.getElementById('publishMessage');
-            msg.style.display = 'block';
-            setTimeout(() => { msg.style.display = 'none'; }, 3000);
-
-            // Refresh list
-            loadActiveAnnouncements();
+            try {
+                await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
+                
+                // Clear form
+                document.getElementById('announcementText').value = '';
+                document.getElementById('authorName').value = '';
+                
+                // Show success message
+                showSuccess('Global announcement published successfully!');
+                
+                // Refresh list
+                loadActiveAnnouncements();
+            } catch (error) {
+                if (error.message.includes('already have an active announcement')) {
+                    showError('You can only have one active announcement at a time. Please remove your existing announcement first.');
+                } else {
+                    showError('Failed to publish announcement: ' + error.message);
+                }
+            }
         }
 
-        function loadActiveAnnouncements() {
-            const announcements = JSON.parse(localStorage.getItem('marketbot_announcements') || '[]');
-            const now = new Date();
-            
-            // Filter out expired announcements
-            const activeAnnouncements = announcements.filter(ann => new Date(ann.expiresAt) > now);
-            
-            // Save cleaned list back
-            localStorage.setItem('marketbot_announcements', JSON.stringify(activeAnnouncements));
+        async function loadActiveAnnouncements() {
+            try {
+                const announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
+                const container = document.getElementById('activeAnnouncementsList');
+                
+                if (announcements.length === 0) {
+                    container.innerHTML = '<p>No active global announcements</p>';
+                    return;
+                }
 
-            const container = document.getElementById('activeAnnouncementsList');
-            
-            if (activeAnnouncements.length === 0) {
-                container.innerHTML = '<p>No active announcements</p>';
-                return;
-            }
-
-            container.innerHTML = activeAnnouncements.map(ann => `
-                <div class="announcement-item">
-                    <div class="announcement-meta">
-                        ${ann.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'} • 
-                        Created: ${new Date(ann.createdAt).toLocaleString()} • 
-                        Expires: ${new Date(ann.expiresAt).toLocaleString()} • 
-                        Author: ${ann.author}
+                container.innerHTML = announcements.map(ann => `
+                    <div class="announcement-item">
+                        <div class="announcement-meta">
+                            ${ann.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'} • 
+                            Created: ${new Date(ann.createdAt).toLocaleString()} • 
+                            Expires: ${new Date(ann.expiresAt).toLocaleString()} • 
+                            Author: ${ann.author}
+                        </div>
+                        <div>${ann.text}</div>
+                        <button onclick="removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
                     </div>
-                    <div>${ann.text}</div>
-                    <button onclick="removeAnnouncement(${ann.id})" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                showError('Failed to load announcements: ' + error.message);
+            }
         }
 
-        function removeAnnouncement(id) {
-            let announcements = JSON.parse(localStorage.getItem('marketbot_announcements') || '[]');
-            announcements = announcements.filter(ann => ann.id !== id);
-            localStorage.setItem('marketbot_announcements', JSON.stringify(announcements));
-            loadActiveAnnouncements();
+        async function removeAnnouncement(id) {
+            try {
+                await window.parent.globalAnnouncements.deleteAnnouncement(id);
+                showSuccess('Announcement removed successfully!');
+                loadActiveAnnouncements();
+            } catch (error) {
+                showError('Failed to remove announcement: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            const container = document.querySelector('.dashboard-section');
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            const container = document.querySelector('.dashboard-section');
+            container.insertBefore(successDiv, container.firstChild);
+            
+            setTimeout(() => successDiv.remove(), 3000);
         }
 
         // Auto-update preview when typing
