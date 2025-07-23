@@ -674,7 +674,9 @@ class AdminAuth {
         // Styles are already included in index.html
     }
 }
-    }
+
+// Initialize the admin authentication system
+const adminAuth = new AdminAuth();
 
     // Create inline dashboard if dashboard.html not found
     createInlineDashboard() {
