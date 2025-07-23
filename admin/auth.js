@@ -609,30 +609,85 @@ class SecureAdminSystem {
         }
     }
 
-    viewBotStats() {
-        const realStats = window.marketBotStats ? window.marketBotStats.getDetailedStats() : null;
-        
-        if (realStats) {
-            const message = `Bot Statistics (Live Data):\n\n` +
-                `26 slash commands active\n` +
-                `${realStats.totals.servers} servers connected\n` +
-                `${realStats.shop.products} products available\n` +
-                `${realStats.shop.categories} product categories\n` +
-                `${realStats.shop.orders} total orders\n` +
-                `${realStats.shop.completedOrders} completed orders\n` +
-                `Revenue: $${realStats.totals.revenue.toFixed(2)}\n` +
-                `Conversion Rate: ${realStats.performance.conversionRate}\n` +
-                `Average Order Value: $${realStats.performance.averageOrderValue}\n` +
-                `Last Updated: ${realStats.performance.lastUpdate ? realStats.performance.lastUpdate.toLocaleTimeString() : 'Never'}`;
+    async viewBotStats() {
+        try {
+            // Fetch real bot statistics from the admin data API
+            const response = await fetch('http://localhost:8082/api/admin/bot-stats');
             
-            alert(message);
-        } else {
-            alert('Bot Statistics:\n\n26 slash commands active\n2 servers connected\nUptime: 99.9%\nAverage response time: 45ms\n\n(Real-time data unavailable)');
+            if (response.ok) {
+                const stats = await response.json();
+                
+                const message = `Bot Statistics (Live Data from Database):\n\n` +
+                    `${stats.system.commands_loaded} slash commands active\n` +
+                    `${stats.system.guilds_connected} servers connected\n` +
+                    `Uptime: ${stats.system.uptime_hours} hours\n` +
+                    `Average response time: ${stats.system.avg_response_time_ms}ms\n\n` +
+                    `Database:\n` +
+                    `- ${stats.database.products} products\n` +
+                    `- ${stats.database.categories} categories\n` +
+                    `- ${stats.database.orders} orders\n` +
+                    `- ${stats.database.support_tickets} support tickets\n\n` +
+                    `Commerce:\n` +
+                    `- ${stats.commerce.completed_sales} completed sales\n` +
+                    `- $${stats.commerce.total_revenue.toFixed(2)} total revenue\n` +
+                    `- ${stats.commerce.low_stock_alerts} low stock alerts\n\n` +
+                    `Support:\n` +
+                    `- ${stats.support.open_tickets} open tickets\n` +
+                    `- ${stats.support.bug_reports} bug reports\n\n` +
+                    `Last Updated: ${new Date(stats.timestamp * 1000).toLocaleString()}`;
+                
+                alert(message);
+            } else {
+                throw new Error('Failed to fetch bot stats');
+            }
+        } catch (error) {
+            console.error('Failed to fetch real bot stats:', error);
+            alert('Bot Statistics (Fallback):\n\n26 slash commands active\n2 servers connected\nUptime: 99.9%\nAverage response time: 45ms\n\n(Real-time data unavailable)');
         }
     }
 
-    viewReports() {
-        alert('User Reports:\n\nBug reports: 3 open\nFeature requests: 12 pending\nUser feedback: Mostly positive');
+    async viewReports() {
+        try {
+            // Fetch real user reports from the admin data API
+            const response = await fetch('http://localhost:8082/api/admin/user-reports');
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.reports.length === 0) {
+                    alert('User Reports:\n\nNo reports found\nAll systems operational');
+                    return;
+                }
+                
+                // Show summary and recent reports
+                let message = `User Reports Summary:\n\n` +
+                    `Total Reports: ${data.summary.total_reports}\n` +
+                    `Open Reports: ${data.summary.open_reports}\n` +
+                    `Resolved Reports: ${data.summary.resolved_reports}\n` +
+                    `Recent (7 days): ${data.summary.recent_reports}\n\n` +
+                    `Recent Reports:\n`;
+                
+                // Show up to 5 most recent reports
+                const recentReports = data.reports.slice(0, 5);
+                recentReports.forEach((report, index) => {
+                    const date = new Date(report.created_at).toLocaleDateString();
+                    message += `\n${index + 1}. [${report.status.toUpperCase()}] ${report.type}\n`;
+                    message += `   ${report.description.substring(0, 60)}${report.description.length > 60 ? '...' : ''}\n`;
+                    message += `   Reporter: ${report.reporter_id} | ${date}\n`;
+                });
+                
+                if (data.reports.length > 5) {
+                    message += `\n... and ${data.reports.length - 5} more reports`;
+                }
+                
+                alert(message);
+            } else {
+                throw new Error('Failed to fetch user reports');
+            }
+        } catch (error) {
+            console.error('Failed to fetch real user reports:', error);
+            alert('User Reports (Fallback):\n\nNo reports available\nReal-time data unavailable');
+        }
     }
 
     viewAnalytics() {
