@@ -56,9 +56,10 @@ section[id] {
     font-weight: bold;
 }
 
-.logo-text {
-    font-size: 1.5rem;
-    margin-right: 10px;
+.nav-logo-img {
+    height: 32px;
+    width: auto;
+    margin-right: 12px;
 }
 
 .nav-links {
@@ -153,15 +154,14 @@ section[id] {
     align-items: center;
 }
 
-.hero-image img {
+.hero-logo {
     width: 100%;
-    max-width: 800px;
+    max-width: 600px;
     height: auto;
-    min-height: 500px;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    border-radius: 20px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
     object-fit: contain;
-    transform: scale(1.1);
+    background: transparent;
 }
 
 /* Hero stats section */
