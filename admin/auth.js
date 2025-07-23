@@ -711,9 +711,13 @@ class SecureAdminSystem {
     }
 
     async maintenanceMode() {
+        console.log('Maintenance mode button clicked');
+        
         try {
             // Check current global maintenance status
             let isCurrentlyInMaintenance = false;
+            console.log('Checking current maintenance status...');
+            
             try {
                 const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
                     cache: 'no-cache',
@@ -721,24 +725,41 @@ class SecureAdminSystem {
                         'Cache-Control': 'no-cache, no-store, must-revalidate'
                     }
                 });
+                
+                console.log('Maintenance status response:', response.status, response.ok);
+                
                 if (response.ok) {
                     const data = await response.json();
                     isCurrentlyInMaintenance = data.maintenance_enabled === true;
                     console.log('Current maintenance status:', data);
+                } else {
+                    console.error('Failed to fetch maintenance status:', response.status, response.statusText);
+                    alert('❌ Unable to check current maintenance status. Please try again.');
+                    return;
                 }
             } catch (error) {
                 console.error('Error checking maintenance status:', error);
+                alert('❌ Network error checking maintenance status. Please check your connection.');
+                return;
             }
             
             const action = isCurrentlyInMaintenance ? 'disable' : 'enable';
+            console.log('Current action needed:', action);
             
             if (confirm(`Are you sure you want to ${action} GLOBAL maintenance mode? This will affect ALL website visitors worldwide.`)) {
                 if (isCurrentlyInMaintenance) {
                     // Disable global maintenance mode
                     console.log('Disabling global maintenance mode...');
-                    await this.updateGlobalMaintenanceStatus(false, '', '');
                     
-                    alert('✅ Global maintenance mode disabled. Website is now accessible to all users worldwide.\n\nChanges may take 1-2 minutes to propagate due to CDN caching.');
+                    try {
+                        await this.updateGlobalMaintenanceStatus(false, '', '');
+                        alert('✅ Global maintenance mode disabled. Website is now accessible to all users worldwide.\n\nChanges may take 1-2 minutes to propagate due to CDN caching.');
+                    } catch (error) {
+                        console.error('Failed to disable maintenance mode:', error);
+                        alert('❌ Failed to disable maintenance mode. Error: ' + error.message);
+                        return;
+                    }
+                    
                 } else {
                     // Enable global maintenance mode
                     const customMessage = prompt('Enter maintenance message for ALL visitors worldwide:', 
@@ -749,23 +770,37 @@ class SecureAdminSystem {
                         const startTime = new Date().toISOString();
                         
                         console.log('Enabling global maintenance mode with message:', message);
-                        await this.updateGlobalMaintenanceStatus(true, message, startTime);
                         
-                        alert('🔧 Global maintenance mode activated!\n\nALL website visitors will see the maintenance page.\nChanges may take 1-2 minutes to propagate due to CDN caching.\n\nTest in incognito mode to verify.');
+                        try {
+                            await this.updateGlobalMaintenanceStatus(true, message, startTime);
+                            alert('🔧 Global maintenance mode activated!\n\nALL website visitors will see the maintenance page.\nChanges may take 1-2 minutes to propagate due to CDN caching.\n\nTest in incognito mode to verify.');
+                        } catch (error) {
+                            console.error('Failed to enable maintenance mode:', error);
+                            alert('❌ Failed to enable maintenance mode. Error: ' + error.message);
+                            return;
+                        }
+                    } else {
+                        console.log('User cancelled maintenance mode activation');
+                        return;
                     }
                 }
                 
                 // Update dashboard to reflect current state
-                this.updateMaintenanceStatus();
+                console.log('Updating maintenance status display...');
+                await this.updateMaintenanceStatus();
+            } else {
+                console.log('User cancelled maintenance mode toggle');
             }
             
         } catch (error) {
-            console.error('Error toggling global maintenance mode:', error);
-            alert('❌ Error toggling maintenance mode. Please check your connection and try again.');
+            console.error('Error in maintenanceMode function:', error);
+            alert('❌ Unexpected error toggling maintenance mode: ' + error.message);
         }
     }
     
     async updateGlobalMaintenanceStatus(enabled, message, startTime) {
+        console.log('updateGlobalMaintenanceStatus called with:', { enabled, message, startTime });
+        
         try {
             const maintenanceData = {
                 maintenance_enabled: enabled,
@@ -775,25 +810,31 @@ class SecureAdminSystem {
                 updated_by: 'Admin'
             };
             
-            console.log('Updating global maintenance status:', maintenanceData);
+            console.log('Maintenance data to update:', maintenanceData);
             
             // Update the live maintenance-status.json file via GitHub API
+            console.log('Calling updateMaintenanceFile...');
             await this.updateMaintenanceFile(maintenanceData);
+            console.log('updateMaintenanceFile completed successfully');
             
             // Also store locally for immediate feedback
             localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
+            console.log('Local storage updated');
             
             return true;
         } catch (error) {
             console.error('Failed to update global maintenance status:', error);
-            throw error;
+            throw new Error('Failed to update maintenance status: ' + error.message);
         }
     }
     
     async updateMaintenanceFile(data) {
+        console.log('updateMaintenanceFile called with data:', data);
+        
         try {
             const fileContent = JSON.stringify(data, null, 2);
             const encodedContent = btoa(fileContent);
+            console.log('File content prepared, length:', fileContent.length);
             
             // GitHub API details
             const GITHUB_TOKEN = 'ghp_wcgVKS1TkJaGkPdyh6vFWGkmD7kCKF4FGSJP';
@@ -802,9 +843,12 @@ class SecureAdminSystem {
             const FILE_PATH = 'maintenance-status.json';
             
             const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            console.log('GitHub API URL:', apiUrl);
             
             // Get current file SHA
             let sha = null;
+            console.log('Getting current file SHA...');
+            
             try {
                 const response = await fetch(apiUrl, {
                     headers: {
@@ -813,24 +857,34 @@ class SecureAdminSystem {
                     }
                 });
                 
+                console.log('SHA fetch response:', response.status, response.ok);
+                
                 if (response.ok) {
                     const fileData = await response.json();
                     sha = fileData.sha;
+                    console.log('Current file SHA:', sha);
+                } else {
+                    const errorText = await response.text();
+                    console.warn('Could not get current file SHA:', response.status, errorText);
                 }
             } catch (error) {
-                console.warn('Could not get current file SHA:', error);
+                console.warn('Error getting current file SHA:', error);
             }
             
             // Update file
             const updateData = {
-                message: `Update global maintenance status: ${data.maintenance_enabled ? 'ENABLED' : 'DISABLED'}`,
+                message: `Update global maintenance status: ${data.maintenance_enabled ? 'ENABLED' : 'DISABLED'} - ${new Date().toISOString()}`,
                 content: encodedContent
             };
             
             if (sha) {
                 updateData.sha = sha;
+                console.log('Using SHA for update:', sha);
+            } else {
+                console.log('No SHA available, creating new file');
             }
             
+            console.log('Sending update request to GitHub...');
             const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
@@ -840,16 +894,23 @@ class SecureAdminSystem {
                 body: JSON.stringify(updateData)
             });
             
+            console.log('GitHub update response:', response.status, response.ok);
+            
             if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('GitHub API error response:', errorText);
+                throw new Error(`GitHub API error: ${response.status} ${response.statusText} - ${errorText}`);
             }
             
+            const responseData = await response.json();
+            console.log('GitHub update successful:', responseData.commit?.sha);
             console.log('Global maintenance file updated successfully');
+            
             return true;
             
         } catch (error) {
             console.error('Failed to update maintenance file:', error);
-            throw error;
+            throw new Error('GitHub update failed: ' + error.message);
         }
     }
     
