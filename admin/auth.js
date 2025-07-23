@@ -41,6 +41,7 @@ class SecureAdminSystem {
     async verifyPassword(password) {
         // Easter egg for specific password
         if (password === 'vyxlez2010') {
+            console.log('Easter egg triggered!');
             this.showEasterEgg();
             return false;
         }
@@ -63,27 +64,36 @@ class SecureAdminSystem {
     }
 
     showEasterEgg() {
+        console.log('Showing easter egg message');
         const errorDiv = document.getElementById('loginError');
+        const passwordField = document.getElementById('adminPassword');
+        
         if (errorDiv) {
+            // Clear any existing content and show easter egg
             errorDiv.innerHTML = `
                 <div class="easter-egg">
                     🚫 You're not hacking me buddy! 🚫
                 </div>
             `;
             errorDiv.style.display = 'block';
+            errorDiv.classList.add('easter-egg-container');
             
-            const passwordField = document.getElementById('adminPassword');
             if (passwordField) {
                 passwordField.value = '';
                 passwordField.style.animation = 'shake 0.5s ease-in-out';
+                passwordField.focus();
             }
             
+            // Auto-hide after 5 seconds
             setTimeout(() => {
                 errorDiv.style.display = 'none';
+                errorDiv.classList.remove('easter-egg-container');
                 if (passwordField) {
                     passwordField.style.animation = '';
                 }
             }, 5000);
+        } else {
+            console.error('loginError element not found for easter egg');
         }
     }
 
@@ -179,7 +189,10 @@ class SecureAdminSystem {
                 this.createSession();
                 this.showDashboard();
             } else {
-                this.showError('Invalid credentials. Access denied.');
+                // Don't show generic error if easter egg was triggered
+                if (password !== 'vyxlez2010') {
+                    this.showError('Invalid credentials. Access denied.');
+                }
                 document.getElementById('adminPassword').value = '';
                 
                 // Security delay after failed attempt
