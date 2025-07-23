@@ -1,7 +1,7 @@
 {
-  "maintenance_enabled": false,
-  "message": "",
-  "start_time": "",
-  "updated_at": "2025-07-23T22:00:00.000Z",
-  "updated_by": "System"
+  "maintenance_enabled": true,
+  "message": "MarketBot is currently undergoing system updates. We'll be back shortly!",
+  "start_time": "2025-07-23T22:15:00.000Z",
+  "updated_at": "2025-07-23T22:15:00.000Z",
+  "updated_by": "Admin"
 }
