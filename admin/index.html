@@ -347,6 +347,7 @@
                     document.getElementById('app-container').innerHTML = dashboardHtml;
                     this.initializeDashboard();
                 } catch (error) {
+                    console.error('Failed to load dashboard.html, using fallback:', error);
                     this.createFallbackDashboard();
                 }
             }
@@ -355,10 +356,19 @@
                 // Add session timeout warning
                 this.setupSessionTimeout();
                 
-                // Initialize announcement system
-                if (typeof loadActiveAnnouncements === 'function') {
-                    loadActiveAnnouncements();
-                }
+                // Initialize announcement system with delay to ensure DOM is ready
+                setTimeout(() => {
+                    console.log('Initializing dashboard...');
+                    console.log('trueGlobalStorage available:', !!window.trueGlobalStorage);
+                    console.log('globalAnnouncements available:', !!window.globalAnnouncements);
+                    
+                    if (typeof loadActiveAnnouncements === 'function') {
+                        console.log('Loading active announcements...');
+                        loadActiveAnnouncements();
+                    } else {
+                        console.warn('loadActiveAnnouncements function not found');
+                    }
+                }, 500);
             }
 
             createFallbackDashboard() {
