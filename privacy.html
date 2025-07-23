@@ -14,14 +14,25 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <span class="logo-text">🛍️</span>
-                <span>MarketBot</span>
+                <img src="logo.png" alt="MarketBot Logo" class="logo">
+                <span class="logo-text">MarketBot</span>
             </div>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="index.html#features">Features</a>
-                <a href="index.html#commands">Commands</a>
-                <a href="terms.html">Terms of Service</a>
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/#pricing">Pricing</a>
+                <a href="/changelog">Changelog</a>
+                <a href="/terms">Terms</a>
+                <a href="admin/">Admin</a>
+                <a href="https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands" class="add-bot-btn">
+                    <span class="btn-text">Add to Discord</span>
+                    <span class="btn-icon">→</span>
+                </a>
+            </div>
+            <div class="hamburger-menu">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
             </div>
         </div>
     </nav>
@@ -161,5 +172,20 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.hamburger-menu').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Initialize announcements
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.globalAnnouncements) {
+                window.globalAnnouncements.loadAndDisplayAnnouncements();
+            }
+        });
+    </script>
 </body>
 </html>
