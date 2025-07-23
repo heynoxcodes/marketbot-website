@@ -715,14 +715,19 @@ class SecureAdminSystem {
             // Check current global maintenance status
             let isCurrentlyInMaintenance = false;
             try {
-                const response = await fetch('maintenance-status.json?' + Date.now());
+                const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
-                    isCurrentlyInMaintenance = data.maintenance_enabled;
+                    isCurrentlyInMaintenance = data.maintenance_enabled === true;
+                    console.log('Current maintenance status:', data);
                 }
             } catch (error) {
-                // Fallback to localStorage
-                isCurrentlyInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
+                console.error('Error checking maintenance status:', error);
             }
             
             const action = isCurrentlyInMaintenance ? 'disable' : 'enable';
@@ -730,28 +735,23 @@ class SecureAdminSystem {
             if (confirm(`Are you sure you want to ${action} GLOBAL maintenance mode? This will affect ALL website visitors worldwide.`)) {
                 if (isCurrentlyInMaintenance) {
                     // Disable global maintenance mode
+                    console.log('Disabling global maintenance mode...');
                     await this.updateGlobalMaintenanceStatus(false, '', '');
-                    localStorage.removeItem('marketbot_maintenance_mode');
-                    localStorage.removeItem('marketbot_maintenance_message');
                     
-                    alert('✅ Global maintenance mode disabled. Website is now accessible to all users worldwide.');
+                    alert('✅ Global maintenance mode disabled. Website is now accessible to all users worldwide.\n\nChanges may take 1-2 minutes to propagate due to CDN caching.');
                 } else {
                     // Enable global maintenance mode
-                    const customMessage = prompt('Enter maintenance message for ALL visitors (or press OK for default):', 
+                    const customMessage = prompt('Enter maintenance message for ALL visitors worldwide:', 
                         'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!');
                     
-                    if (customMessage !== null) {
-                        const message = customMessage || 'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!';
+                    if (customMessage !== null && customMessage.trim() !== '') {
+                        const message = customMessage.trim();
                         const startTime = new Date().toISOString();
                         
+                        console.log('Enabling global maintenance mode with message:', message);
                         await this.updateGlobalMaintenanceStatus(true, message, startTime);
                         
-                        // Also set locally for immediate admin dashboard update
-                        localStorage.setItem('marketbot_maintenance_mode', 'true');
-                        localStorage.setItem('marketbot_maintenance_message', message);
-                        localStorage.setItem('marketbot_maintenance_start', startTime);
-                        
-                        alert('🔧 Global maintenance mode activated. ALL website visitors will see the maintenance page.');
+                        alert('🔧 Global maintenance mode activated!\n\nALL website visitors will see the maintenance page.\nChanges may take 1-2 minutes to propagate due to CDN caching.\n\nTest in incognito mode to verify.');
                     }
                 }
                 
@@ -864,24 +864,21 @@ class SecureAdminSystem {
             
             // Check global status first
             try {
-                const response = await fetch('maintenance-status.json?' + Date.now());
+                const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.maintenance_enabled) {
+                    if (data.maintenance_enabled === true) {
                         isInMaintenance = true;
                         isGlobal = true;
                     }
                 }
             } catch (error) {
-                // Fallback to localStorage
-                const globalData = localStorage.getItem('marketbot_global_maintenance');
-                if (globalData) {
-                    const data = JSON.parse(globalData);
-                    if (data.maintenance_enabled) {
-                        isInMaintenance = true;
-                        isGlobal = true;
-                    }
-                }
+                console.error('Error checking global maintenance status:', error);
             }
             
             // Check local maintenance as fallback
