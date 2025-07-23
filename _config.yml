@@ -1,0 +1,23 @@
+# GitHub Pages Jekyll configuration for clean URLs
+plugins:
+  - jekyll-redirect-from
+
+# Clean URLs without .html extension
+permalink: pretty
+
+# Custom domain
+url: "https://getmarketbot.store"
+baseurl: ""
+
+# Site metadata
+title: "MarketBot - Discord Marketplace Bot"
+description: "Transform your Discord server into a professional marketplace"
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - CNAME
+  
+# Include dotfiles
+include:
+  - .htaccess
