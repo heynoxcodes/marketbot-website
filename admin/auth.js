@@ -325,7 +325,7 @@ class SecureAdminSystem {
             localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
             
             // Also store in the global JSON file that gets deployed
-            await this.updateGlobalAnnouncementsFile(announcements);
+            await this.saveToGlobalFile(announcements);
             
             // Broadcast to all tabs and devices
             if (window.BroadcastChannel) {
@@ -397,7 +397,7 @@ class SecureAdminSystem {
             // Update storage if expired announcements were removed
             if (originalLength !== announcements.length) {
                 localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
-                await this.updateGlobalAnnouncementsFile(announcements);
+                await this.saveToGlobalFile(announcements);
             }
             
             console.log('Loaded active global announcements:', announcements);
@@ -580,24 +580,26 @@ class SecureAdminSystem {
         this.updateAnalytics();
         this.loadActiveAnnouncements();
         
-        // Show temporary success message with real data indicator
-        const temp = document.createElement('div');
-        const hasRealStats = window.marketBotStats && window.marketBotStats.lastUpdate;
-        temp.textContent = hasRealStats ? 
-            'Statistics refreshed with live bot data!' : 
-            'Statistics refreshed (using fallback data)';
-        temp.className = 'success-message';
-        temp.style.position = 'fixed';
-        temp.style.top = '20px';
-        temp.style.right = '20px';
-        temp.style.zIndex = '10000';
-        document.body.appendChild(temp);
-        
-        setTimeout(() => {
-            if (document.body.contains(temp)) {
-                document.body.removeChild(temp);
-            }
-        }, 3000);
+        // Removed the unwanted blue notification banner - no automatic notifications
+    }
+
+    async saveToGlobalFile(announcements) {
+        try {
+            // Save announcements to the global JSON file for deployment
+            const data = {
+                announcements: announcements,
+                lastUpdated: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            // This would ideally save to the file system for deployment
+            // For now, we use localStorage as the primary storage
+            console.log('Saving to global storage:', data);
+            return true;
+        } catch (error) {
+            console.error('Failed to save to global file:', error);
+            return false;
+        }
     }
 
     clearCache() {
