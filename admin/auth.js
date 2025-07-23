@@ -773,7 +773,7 @@ class SecureAdminSystem {
                         
                         try {
                             await this.updateGlobalMaintenanceStatus(true, message, startTime);
-                            alert('🔧 Global maintenance mode activated!\n\nALL website visitors will see the maintenance page.\nChanges may take 1-2 minutes to propagate due to CDN caching.\n\nTest in incognito mode to verify.');
+                            alert('🔧 Maintenance mode activated locally!\n\nThis will show maintenance mode for visitors on this browser session.\n\nFor true global maintenance, server-side configuration is needed.\n\nTest in incognito mode to verify it works.');
                         } catch (error) {
                             console.error('Failed to enable maintenance mode:', error);
                             alert('❌ Failed to enable maintenance mode. Error: ' + error.message);
@@ -831,86 +831,24 @@ class SecureAdminSystem {
     async updateMaintenanceFile(data) {
         console.log('updateMaintenanceFile called with data:', data);
         
+        // For now, we'll use localStorage as a temporary solution
+        // until we can get proper server-side maintenance control
         try {
-            const fileContent = JSON.stringify(data, null, 2);
-            const encodedContent = btoa(fileContent);
-            console.log('File content prepared, length:', fileContent.length);
+            console.log('Storing maintenance data in localStorage...');
+            localStorage.setItem('marketbot_global_maintenance_status', JSON.stringify(data));
             
-            // GitHub API details
-            const GITHUB_TOKEN = 'ghp_wcgVKS1TkJaGkPdyh6vFWGkmD7kCKF4FGSJP';
-            const REPO_OWNER = 'heynoxcodes';
-            const REPO_NAME = 'marketbot-website';
-            const FILE_PATH = 'maintenance-status.json';
+            // Also trigger a page refresh after a short delay to update the maintenance check
+            console.log('Maintenance status updated locally');
             
-            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            console.log('GitHub API URL:', apiUrl);
+            // Simulate server update with a timeout
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Get current file SHA
-            let sha = null;
-            console.log('Getting current file SHA...');
-            
-            try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('SHA fetch response:', response.status, response.ok);
-                
-                if (response.ok) {
-                    const fileData = await response.json();
-                    sha = fileData.sha;
-                    console.log('Current file SHA:', sha);
-                } else {
-                    const errorText = await response.text();
-                    console.warn('Could not get current file SHA:', response.status, errorText);
-                }
-            } catch (error) {
-                console.warn('Error getting current file SHA:', error);
-            }
-            
-            // Update file
-            const updateData = {
-                message: `Update global maintenance status: ${data.maintenance_enabled ? 'ENABLED' : 'DISABLED'} - ${new Date().toISOString()}`,
-                content: encodedContent
-            };
-            
-            if (sha) {
-                updateData.sha = sha;
-                console.log('Using SHA for update:', sha);
-            } else {
-                console.log('No SHA available, creating new file');
-            }
-            
-            console.log('Sending update request to GitHub...');
-            const response = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updateData)
-            });
-            
-            console.log('GitHub update response:', response.status, response.ok);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('GitHub API error response:', errorText);
-                throw new Error(`GitHub API error: ${response.status} ${response.statusText} - ${errorText}`);
-            }
-            
-            const responseData = await response.json();
-            console.log('GitHub update successful:', responseData.commit?.sha);
-            console.log('Global maintenance file updated successfully');
-            
+            console.log('Maintenance file update completed (local storage)');
             return true;
             
         } catch (error) {
-            console.error('Failed to update maintenance file:', error);
-            throw new Error('GitHub update failed: ' + error.message);
+            console.error('Failed to update maintenance status:', error);
+            throw new Error('Failed to update maintenance status: ' + error.message);
         }
     }
     
