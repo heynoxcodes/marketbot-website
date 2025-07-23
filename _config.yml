@@ -13,9 +13,6 @@ baseurl: ""
 title: "MarketBot - Discord Marketplace Bot"
 description: "Transform your Discord server into a professional marketplace"
 
-# Force rebuild timestamp
-rebuild_time: "1753291206"
-
 # Exclude files from processing
 exclude:
   - README.md
