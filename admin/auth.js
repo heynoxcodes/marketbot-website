@@ -454,10 +454,13 @@ class SecureAdminSystem {
 
     updateAnalytics() {
         try {
+            // Get real statistics from the stats API
+            const realStats = window.marketBotStats ? window.marketBotStats.getStats() : null;
+            
             const announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
             const activeCount = announcements.filter(ann => new Date(ann.expiresAt) > new Date()).length;
             
-            // Update dashboard metrics
+            // Update dashboard metrics with real data
             const elements = {
                 totalServers: document.getElementById('totalServers'),
                 totalUsers: document.getElementById('totalUsers'),
@@ -465,10 +468,23 @@ class SecureAdminSystem {
                 activeAnnouncements: document.getElementById('activeAnnouncements')
             };
 
-            if (elements.totalServers) elements.totalServers.textContent = '2';
-            if (elements.totalUsers) elements.totalUsers.textContent = '150';
-            if (elements.totalRevenue) elements.totalRevenue.textContent = '$2,847';
-            if (elements.activeAnnouncements) elements.activeAnnouncements.textContent = activeCount.toString();
+            if (realStats) {
+                // Use real statistics from bot database
+                if (elements.totalServers) elements.totalServers.textContent = realStats.servers.toString();
+                if (elements.totalUsers) elements.totalUsers.textContent = realStats.users.toString();
+                if (elements.totalRevenue) elements.totalRevenue.textContent = `$${realStats.revenue.toFixed(2)}`;
+                if (elements.activeAnnouncements) elements.activeAnnouncements.textContent = activeCount.toString();
+                
+                console.log('Analytics updated with real stats:', realStats);
+            } else {
+                // Fallback to default values if stats API unavailable
+                if (elements.totalServers) elements.totalServers.textContent = '2';
+                if (elements.totalUsers) elements.totalUsers.textContent = '150';
+                if (elements.totalRevenue) elements.totalRevenue.textContent = '$29.99';
+                if (elements.activeAnnouncements) elements.activeAnnouncements.textContent = activeCount.toString();
+                
+                console.log('Analytics updated with fallback stats');
+            }
             
         } catch (error) {
             console.error('Failed to update analytics:', error);
@@ -522,14 +538,28 @@ class SecureAdminSystem {
     }
 
     // Quick action methods
-    refreshStats() {
+    async refreshStats() {
         console.log('Refreshing statistics...');
+        
+        // Refresh real stats from API if available
+        if (window.marketBotStats) {
+            try {
+                await window.marketBotStats.refresh();
+                console.log('Real stats refreshed from bot database');
+            } catch (error) {
+                console.error('Failed to refresh real stats:', error);
+            }
+        }
+        
         this.updateAnalytics();
         this.loadActiveAnnouncements();
         
-        // Show temporary success message
+        // Show temporary success message with real data indicator
         const temp = document.createElement('div');
-        temp.textContent = 'Statistics refreshed successfully!';
+        const hasRealStats = window.marketBotStats && window.marketBotStats.lastUpdate;
+        temp.textContent = hasRealStats ? 
+            'Statistics refreshed with live bot data!' : 
+            'Statistics refreshed (using fallback data)';
         temp.className = 'success-message';
         temp.style.position = 'fixed';
         temp.style.top = '20px';
@@ -538,7 +568,9 @@ class SecureAdminSystem {
         document.body.appendChild(temp);
         
         setTimeout(() => {
-            document.body.removeChild(temp);
+            if (document.body.contains(temp)) {
+                document.body.removeChild(temp);
+            }
         }, 3000);
     }
 
@@ -565,7 +597,25 @@ class SecureAdminSystem {
     }
 
     viewBotStats() {
-        alert('Bot Statistics:\n\n26 slash commands active\n2 servers connected\nUptime: 99.9%\nAverage response time: 45ms');
+        const realStats = window.marketBotStats ? window.marketBotStats.getDetailedStats() : null;
+        
+        if (realStats) {
+            const message = `Bot Statistics (Live Data):\n\n` +
+                `26 slash commands active\n` +
+                `${realStats.totals.servers} servers connected\n` +
+                `${realStats.shop.products} products available\n` +
+                `${realStats.shop.categories} product categories\n` +
+                `${realStats.shop.orders} total orders\n` +
+                `${realStats.shop.completedOrders} completed orders\n` +
+                `Revenue: $${realStats.totals.revenue.toFixed(2)}\n` +
+                `Conversion Rate: ${realStats.performance.conversionRate}\n` +
+                `Average Order Value: $${realStats.performance.averageOrderValue}\n` +
+                `Last Updated: ${realStats.performance.lastUpdate ? realStats.performance.lastUpdate.toLocaleTimeString() : 'Never'}`;
+            
+            alert(message);
+        } else {
+            alert('Bot Statistics:\n\n26 slash commands active\n2 servers connected\nUptime: 99.9%\nAverage response time: 45ms\n\n(Real-time data unavailable)');
+        }
     }
 
     viewReports() {
