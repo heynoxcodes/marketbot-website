@@ -1,19 +1,35 @@
-// Maintenance Mode Check System
+// Global Maintenance Mode Check System
 (function() {
     'use strict';
     
-    function checkMaintenanceMode() {
-        const isInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
+    async function checkMaintenanceMode() {
+        try {
+            // First check global maintenance file
+            const response = await fetch('maintenance-status.json?' + Date.now());
+            if (response.ok) {
+                const data = await response.json();
+                if (data.maintenance_enabled && !window.location.pathname.includes('/admin')) {
+                    showMaintenancePage(data.message, data.start_time);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('Could not check global maintenance status, using localStorage fallback');
+        }
         
+        // Fallback to local storage for admin testing
+        const isInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
         if (isInMaintenance && !window.location.pathname.includes('/admin')) {
-            showMaintenancePage();
+            const message = localStorage.getItem('marketbot_maintenance_message');
+            const startTime = localStorage.getItem('marketbot_maintenance_start');
+            showMaintenancePage(message, startTime);
         }
     }
     
-    function showMaintenancePage() {
-        const message = localStorage.getItem('marketbot_maintenance_message') || 
+    function showMaintenancePage(customMessage, customStartTime) {
+        const message = customMessage || 
             'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!';
-        const startTime = localStorage.getItem('marketbot_maintenance_start');
+        const startTime = customStartTime;
         
         document.body.innerHTML = `
             <div style="
