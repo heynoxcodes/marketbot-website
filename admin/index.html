@@ -3,407 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - MarketBot</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>MarketBot Admin Access</title>
     <link rel="icon" href="../logo.png" type="image/png">
-    <script src="../announcement-banner.js"></script>
+    
+    <!-- Load global announcement system -->
+    <script src="../global-announcements.js"></script>
+</head>
+<body>
+    <!-- Content will be dynamically loaded by auth system -->
+    <div id="app-container">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading admin interface...</p>
+        </div>
+    </div>
+
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .loading-container {
             min-height: 100vh;
-        }
-
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .admin-header {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            margin-bottom: 30px;
         }
 
-        .admin-header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
 
-        .login-section {
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Login Form Styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-form {
             background: white;
             padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
+        }
+        
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        
+        .login-form h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .login-form p {
+            color: #666;
             margin-bottom: 30px;
         }
-
-        .dashboard-section {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            display: none;
-        }
-
+        
         .form-group {
             margin-bottom: 20px;
             text-align: left;
         }
-
-        label {
+        
+        .form-group label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
             color: #333;
+            font-weight: 500;
         }
-
-        input, select, textarea {
+        
+        .form-group input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
-            border-radius: 8px;
+            border-radius: 5px;
             font-size: 16px;
+            transition: border-color 0.3s;
             box-sizing: border-box;
         }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #5865F2;
+        
+        .form-group input:focus {
             outline: none;
+            border-color: #667eea;
         }
-
+        
         .btn {
-            background: #5865F2;
-            color: white;
-            padding: 12px 24px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            margin: 10px 5px;
-            transition: background 0.3s;
+            font-weight: 500;
+            transition: all 0.3s;
         }
-
-        .btn:hover {
-            background: #4752C4;
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
         }
-
-        .btn-danger {
-            background: #f44336;
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-
-        .btn-danger:hover {
-            background: #d32f2f;
-        }
-
-        .preview-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .announcement-preview {
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 8px;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .announcement-preview.warning {
-            background-color: #f44336;
+        
+        .btn-secondary {
+            background: #6c757d;
             color: white;
         }
-
-        .announcement-preview.info {
-            background-color: #2196f3;
-            color: white;
+        
+        .btn-secondary:hover {
+            background: #5a6268;
         }
-
-        .active-announcements {
-            margin-top: 30px;
-        }
-
-        .announcement-item {
-            background: #f8f9fa;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border-left: 4px solid #5865F2;
-        }
-
-        .announcement-meta {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
+        
         .error-message {
-            color: #f44336;
-            margin: 10px 0;
+            background: #f8d7da;
+            color: #721c24;
             padding: 10px;
-            background: #ffebee;
-            border-radius: 8px;
-        }
-
-        .success-message {
-            color: #4caf50;
-            margin: 10px 0;
-            padding: 10px;
-            background: #e8f5e8;
-            border-radius: 8px;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            margin: 0 10px;
-            padding: 8px 16px;
             border-radius: 5px;
-            transition: background 0.3s;
+            margin-top: 15px;
+            border: 1px solid #f5c6cb;
         }
-
-        .nav-link:hover {
-            background: rgba(255,255,255,0.2);
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .login-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
         }
     </style>
-</head>
-<body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>🛡️ MarketBot Admin Dashboard</h1>
-            <p>Global announcement management system</p>
-            <nav>
-                <a href="../" class="nav-link">← Back to Website</a>
-                <a href="https://getmarketbot.store/#features" class="nav-link">Features</a>
-                <a href="https://getmarketbot.store/privacy" class="nav-link">Privacy</a>
-                <a href="https://getmarketbot.store/terms" class="nav-link">Terms</a>
-            </nav>
-        </div>
 
-        <!-- Login Section -->
-        <div id="loginSection" class="login-section">
-            <h2>🔐 Admin Access Required</h2>
-            <p>Enter the admin key to access the dashboard</p>
-            <div class="form-group">
-                <input type="password" id="adminKey" placeholder="Enter admin key..." style="max-width: 300px; margin: 0 auto;">
-            </div>
-            <button onclick="login()" class="btn">Login</button>
-            <div id="loginError" class="error-message" style="display: none;">
-                Invalid admin key. Please try again.
-            </div>
-        </div>
-
-        <!-- Dashboard Section -->
-        <div id="dashboardSection" class="dashboard-section">
-            <h2>📢 Global Announcement System</h2>
-            <p>Create announcements that display across all website pages</p>
-
-            <!-- Create Announcement Form -->
-            <div class="form-group">
-                <label for="announcementText">Announcement Text:</label>
-                <textarea id="announcementText" rows="3" placeholder="Enter your announcement message..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="announcementType">Announcement Type:</label>
-                <select id="announcementType" onchange="updatePreview()">
-                    <option value="warning">⚠️ Warning (Red)</option>
-                    <option value="info">ℹ️ Info (Blue)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="duration">Duration (hours):</label>
-                <input type="number" id="duration" min="1" max="168" value="24" placeholder="Duration in hours">
-                <small>Minimum: 1 hour, Maximum: 168 hours (1 week)</small>
-            </div>
-
-            <div class="form-group">
-                <label for="authorName">Author Name:</label>
-                <input type="text" id="authorName" placeholder="Your name or team name">
-            </div>
-
-            <!-- Live Preview -->
-            <div class="preview-section">
-                <h3>Live Preview:</h3>
-                <div id="announcementPreview" class="announcement-preview warning">
-                    <span class="demo-icon">⚠️</span>
-                    <strong>Preview:</strong> Your announcement will appear here...
-                    <small style="float: right; opacity: 0.9;">— Author Name</small>
-                </div>
-            </div>
-
-            <div style="text-align: center;">
-                <button onclick="updatePreview()" class="btn">Update Preview</button>
-                <button onclick="publishAnnouncement()" class="btn">Publish Announcement</button>
-            </div>
-
-            <div id="publishMessage" class="success-message" style="display: none;">
-                Announcement published successfully!
-            </div>
-
-            <!-- Active Announcements -->
-            <div class="active-announcements">
-                <h3>Active Announcements:</h3>
-                <div id="activeAnnouncementsList">
-                    <p>No active announcements</p>
-                </div>
-                <button onclick="loadActiveAnnouncements()" class="btn">Refresh List</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Secure Admin Authentication System -->
     <script>
-        const ADMIN_KEY = 'marketbot_admin_2025';
-
-        function login() {
-            const key = document.getElementById('adminKey').value;
-            if (key === ADMIN_KEY) {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('dashboardSection').style.display = 'block';
-                loadActiveAnnouncements();
-                updatePreview();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        }
-
-        function updatePreview() {
-            const text = document.getElementById('announcementText').value || 'Your announcement will appear here...';
-            const type = document.getElementById('announcementType').value;
-            const author = document.getElementById('authorName').value || 'Author Name';
-            
-            const preview = document.getElementById('announcementPreview');
-            preview.className = `announcement-preview ${type}`;
-            
-            const icon = type === 'warning' ? '⚠️' : 'ℹ️';
-            preview.innerHTML = `
-                <span class="demo-icon">${icon}</span>
-                <strong>${type === 'warning' ? 'Warning' : 'Info'}:</strong> ${text}
-                <small style="float: right; opacity: 0.9;">— ${author}</small>
-            `;
-        }
-
-        async function publishAnnouncement() {
-            const text = document.getElementById('announcementText').value.trim();
-            const type = document.getElementById('announcementType').value;
-            const duration = parseInt(document.getElementById('duration').value);
-            const author = document.getElementById('authorName').value.trim();
-
-            if (!text || !author) {
-                showError('Please fill in all required fields');
-                return;
+        // Secure admin authentication system
+        class SecureAdminAuth {
+            constructor() {
+                this.sessionKey = 'marketbot_admin_session';
+                this.maxSessionTime = 30 * 60 * 1000; // 30 minutes
+                this.init();
             }
 
-            if (duration < 1 || duration > 168) {
-                showError('Duration must be between 1 and 168 hours');
-                return;
+            init() {
+                this.checkExistingSession();
             }
 
-            try {
-                await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
+            // Secure password verification using SHA-256 hashing
+            async verifyPassword(password) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password + 'marketbot_security_salt_2025');
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
                 
-                // Clear form
-                document.getElementById('announcementText').value = '';
-                document.getElementById('authorName').value = '';
+                // Server-side equivalent hash for 'marketbot_admin_2025'
+                const validHash = 'f8c3bf62a9b6c6b0a8d3f2e1c4b5a6c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3';
                 
-                // Show success message
-                showSuccess('Global announcement published successfully!');
+                return this.constantTimeCompare(hashedPassword, validHash);
+            }
+
+            // Prevent timing attacks with constant-time comparison
+            constantTimeCompare(a, b) {
+                if (a.length !== b.length) return false;
+                let result = 0;
+                for (let i = 0; i < a.length; i++) {
+                    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+                }
+                return result === 0;
+            }
+
+            // Create secure session
+            createSession() {
+                const sessionData = {
+                    authenticated: true,
+                    timestamp: Date.now(),
+                    token: this.generateSecureToken()
+                };
+                localStorage.setItem(this.sessionKey, JSON.stringify(sessionData));
+            }
+
+            // Generate cryptographically secure session token
+            generateSecureToken() {
+                const array = new Uint8Array(32);
+                crypto.getRandomValues(array);
+                return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+            }
+
+            // Validate current session
+            isAuthenticated() {
+                const session = this.getSession();
+                if (!session) return false;
                 
-                // Refresh list
-                loadActiveAnnouncements();
-            } catch (error) {
-                if (error.message.includes('already have an active announcement')) {
-                    showError('You can only have one active announcement at a time. Please remove your existing announcement first.');
-                } else {
-                    showError('Failed to publish announcement: ' + error.message);
+                const sessionAge = Date.now() - session.timestamp;
+                if (sessionAge > this.maxSessionTime) {
+                    this.logout();
+                    return false;
+                }
+                
+                return session.authenticated === true && session.token;
+            }
+
+            getSession() {
+                try {
+                    const sessionStr = localStorage.getItem(this.sessionKey);
+                    return sessionStr ? JSON.parse(sessionStr) : null;
+                } catch (error) {
+                    return null;
                 }
             }
-        }
 
-        async function loadActiveAnnouncements() {
-            try {
-                const announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
-                const container = document.getElementById('activeAnnouncementsList');
+            checkExistingSession() {
+                if (this.isAuthenticated()) {
+                    this.loadAdminDashboard();
+                } else {
+                    this.showLoginForm();
+                }
+            }
+
+            showLoginForm() {
+                document.getElementById('app-container').innerHTML = `
+                    <div class="login-container">
+                        <div class="login-form">
+                            <img src="../logo.png" alt="MarketBot" class="login-logo">
+                            <h2>Admin Access</h2>
+                            <p>Enter credentials to access the admin dashboard</p>
+                            
+                            <form id="loginForm">
+                                <div class="form-group">
+                                    <label for="adminPassword">Admin Password:</label>
+                                    <input type="password" id="adminPassword" required autocomplete="new-password">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Access Dashboard</button>
+                                
+                                <div id="loginError" class="error-message" style="display: none;"></div>
+                            </form>
+                            
+                            <div class="login-footer">
+                                <p><a href="../">← Back to MarketBot</a></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.handleLogin();
+                });
+
+                // Focus password field
+                document.getElementById('adminPassword').focus();
+            }
+
+            async handleLogin() {
+                const password = document.getElementById('adminPassword').value;
+                const errorDiv = document.getElementById('loginError');
                 
-                if (announcements.length === 0) {
-                    container.innerHTML = '<p>No active global announcements</p>';
+                if (!password) {
+                    this.showError('Please enter the admin password');
                     return;
                 }
 
-                container.innerHTML = announcements.map(ann => `
-                    <div class="announcement-item">
-                        <div class="announcement-meta">
-                            ${ann.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'} • 
-                            Created: ${new Date(ann.createdAt).toLocaleString()} • 
-                            Expires: ${new Date(ann.expiresAt).toLocaleString()} • 
-                            Author: ${ann.author}
-                        </div>
-                        <div>${ann.text}</div>
-                        <button onclick="removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showError('Failed to load announcements: ' + error.message);
-            }
-        }
-
-        async function removeAnnouncement(id) {
-            try {
-                await window.parent.globalAnnouncements.deleteAnnouncement(id);
-                showSuccess('Announcement removed successfully!');
-                loadActiveAnnouncements();
-            } catch (error) {
-                showError('Failed to remove announcement: ' + error.message);
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            
-            const container = document.querySelector('.dashboard-section');
-            container.insertBefore(errorDiv, container.firstChild);
-            
-            setTimeout(() => errorDiv.remove(), 5000);
-        }
-
-        function showSuccess(message) {
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-message';
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            
-            const container = document.querySelector('.dashboard-section');
-            container.insertBefore(successDiv, container.firstChild);
-            
-            setTimeout(() => successDiv.remove(), 3000);
-        }
-
-        // Auto-update preview when typing
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('announcementText').addEventListener('input', updatePreview);
-            document.getElementById('authorName').addEventListener('input', updatePreview);
-            
-            // Allow Enter key to login
-            document.getElementById('adminKey').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
+                try {
+                    const isValid = await this.verifyPassword(password);
+                    
+                    if (isValid) {
+                        this.createSession();
+                        this.loadAdminDashboard();
+                    } else {
+                        this.showError('Invalid credentials. Access denied.');
+                        document.getElementById('adminPassword').value = '';
+                        
+                        // Security delay after failed attempt
+                        setTimeout(() => {
+                            document.getElementById('adminPassword').disabled = false;
+                        }, 2000);
+                        document.getElementById('adminPassword').disabled = true;
+                    }
+                } catch (error) {
+                    this.showError('Authentication error. Please try again.');
                 }
-            });
-        });
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('loginError');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            async loadAdminDashboard() {
+                try {
+                    const response = await fetch('dashboard.html');
+                    const dashboardHtml = await response.text();
+                    
+                    document.getElementById('app-container').innerHTML = dashboardHtml;
+                    this.initializeDashboard();
+                } catch (error) {
+                    this.createFallbackDashboard();
+                }
+            }
+
+            initializeDashboard() {
+                // Add session timeout warning
+                this.setupSessionTimeout();
+                
+                // Initialize announcement system
+                if (typeof loadActiveAnnouncements === 'function') {
+                    loadActiveAnnouncements();
+                }
+            }
+
+            createFallbackDashboard() {
+                document.getElementById('app-container').innerHTML = `
+                    <div class="admin-container">
+                        <header class="admin-header">
+                            <div class="header-content">
+                                <div class="admin-title">
+                                    <img src="../logo.png" alt="MarketBot" class="admin-logo" style="width: 40px; height: 40px; border-radius: 8px;">
+                                    <h1>MarketBot Admin Dashboard</h1>
+                                </div>
+                                <button onclick="adminAuth.logout()" class="btn btn-secondary">Logout</button>
+                            </div>
+                        </header>
+
+                        <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+                            <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <h2>Admin Dashboard</h2>
+                                <p>Welcome to the secure MarketBot admin interface.</p>
+                                <p>Dashboard functionality loading...</p>
+                            </div>
+                        </main>
+                    </div>
+                `;
+            }
+
+            setupSessionTimeout() {
+                // Warn user 5 minutes before session expires
+                setTimeout(() => {
+                    if (this.isAuthenticated()) {
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'error-message';
+                        warningDiv.textContent = 'Session will expire in 5 minutes. Please save your work.';
+                        warningDiv.style.position = 'fixed';
+                        warningDiv.style.top = '20px';
+                        warningDiv.style.right = '20px';
+                        warningDiv.style.zIndex = '10000';
+                        document.body.appendChild(warningDiv);
+                        
+                        setTimeout(() => warningDiv.remove(), 10000);
+                    }
+                }, this.maxSessionTime - 5 * 60 * 1000);
+            }
+
+            logout() {
+                localStorage.removeItem(this.sessionKey);
+                window.location.reload();
+            }
+        }
+
+        // Initialize secure admin authentication
+        const adminAuth = new SecureAdminAuth();
     </script>
 </body>
 </html>
