@@ -3,26 +3,41 @@
     'use strict';
     
     async function checkMaintenanceMode() {
-        try {
-            // First check global maintenance file
-            const response = await fetch('maintenance-status.json?' + Date.now());
-            if (response.ok) {
-                const data = await response.json();
-                if (data.maintenance_enabled && !window.location.pathname.includes('/admin')) {
-                    showMaintenancePage(data.message, data.start_time);
-                    return;
-                }
-            }
-        } catch (error) {
-            console.warn('Could not check global maintenance status, using localStorage fallback');
+        // Skip maintenance check for admin pages
+        if (window.location.pathname.includes('/admin')) {
+            return;
         }
         
-        // Fallback to local storage for admin testing
-        const isInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
-        if (isInMaintenance && !window.location.pathname.includes('/admin')) {
-            const message = localStorage.getItem('marketbot_maintenance_message');
-            const startTime = localStorage.getItem('marketbot_maintenance_start');
-            showMaintenancePage(message, startTime);
+        try {
+            console.log('Checking maintenance status...');
+            
+            // Check the live maintenance status file with cache busting
+            const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Maintenance status loaded:', data);
+                
+                if (data.maintenance_enabled === true) {
+                    console.log('Maintenance mode is ENABLED - showing maintenance page');
+                    showMaintenancePage(data.message, data.start_time);
+                    return;
+                } else {
+                    console.log('Maintenance mode is DISABLED - site operational');
+                }
+            } else {
+                console.warn('Could not load maintenance status file:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error checking maintenance status:', error);
         }
     }
     
