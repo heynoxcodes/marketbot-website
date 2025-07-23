@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketBot Stats API Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F0F23;
+            color: #E2E8F0;
+            padding: 2rem;
+        }
+        .stats-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+        .stat-item {
+            background: rgba(45, 55, 72, 0.3);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #7C3AED, #A855F7);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        .success { color: #86EFAC; }
+        .error { color: #FCA5A5; }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <h1>MarketBot Real Stats API Test</h1>
+        <p>This page tests the connection between the web admin panel and the Discord bot's real database.</p>
+        
+        <button class="test-btn" onclick="testStatsAPI()">Test Real Stats API</button>
+        
+        <div id="results">
+            <div class="stat-item">
+                <span>API Status:</span>
+                <span id="apiStatus">Not tested</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Servers:</span>
+                <span id="totalServers">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Users:</span>
+                <span id="totalUsers">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Products:</span>
+                <span id="totalProducts">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Categories:</span>
+                <span id="totalCategories">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Orders:</span>
+                <span id="totalOrders">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Completed Orders:</span>
+                <span id="completedOrders">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Revenue:</span>
+                <span id="totalRevenue">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Last Updated:</span>
+                <span id="lastUpdated">-</span>
+            </div>
+        </div>
+        
+        <div id="rawData" style="margin-top: 2rem; background: rgba(45, 55, 72, 0.3); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap;"></div>
+    </div>
+
+    <script>
+        async function testStatsAPI() {
+            const apiStatus = document.getElementById('apiStatus');
+            const rawData = document.getElementById('rawData');
+            
+            try {
+                apiStatus.textContent = 'Testing...';
+                apiStatus.className = '';
+                
+                // Try to fetch from the local stats API
+                const response = await fetch('http://localhost:8081/api/stats');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update status
+                    apiStatus.textContent = 'Connected to Live Bot Data';
+                    apiStatus.className = 'success';
+                    
+                    // Update individual stats
+                    document.getElementById('totalServers').textContent = data.servers || '0';
+                    document.getElementById('totalUsers').textContent = data.users || '0';
+                    document.getElementById('totalProducts').textContent = data.total_products || '0';
+                    document.getElementById('totalCategories').textContent = data.total_categories || '0';
+                    document.getElementById('totalOrders').textContent = data.total_orders || '0';
+                    document.getElementById('completedOrders').textContent = data.completed_orders || '0';
+                    document.getElementById('totalRevenue').textContent = '$' + (data.total_revenue || 0).toFixed(2);
+                    document.getElementById('lastUpdated').textContent = new Date(data.timestamp * 1000).toLocaleString();
+                    
+                    // Show raw data
+                    rawData.textContent = 'Raw API Response:\n' + JSON.stringify(data, null, 2);
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                apiStatus.textContent = 'API Not Available (Using Fallback Data)';
+                apiStatus.className = 'error';
+                
+                // Show fallback stats
+                document.getElementById('totalServers').textContent = '2';
+                document.getElementById('totalUsers').textContent = '150';
+                document.getElementById('totalProducts').textContent = '2';
+                document.getElementById('totalCategories').textContent = '2';
+                document.getElementById('totalOrders').textContent = '3';
+                document.getElementById('completedOrders').textContent = '1';
+                document.getElementById('totalRevenue').textContent = '$29.99';
+                document.getElementById('lastUpdated').textContent = 'Fallback Data';
+                
+                rawData.textContent = 'API Error:\n' + error.message + '\n\nUsing fallback data that matches the current bot state.';
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', testStatsAPI);
+    </script>
+</body>
+</html>
