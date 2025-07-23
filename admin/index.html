@@ -200,7 +200,7 @@
                 const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
                 
                 // Server-side equivalent hash for 'marketbot_admin_2025'
-                const validHash = 'f8c3bf62a9b6c6b0a8d3f2e1c4b5a6c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3';
+                const validHash = 'bc683774a01cd54c2e9ffb13865dbda7d90cdfa106eefe51ad15292af2d37dbb';
                 
                 return this.constantTimeCompare(hashedPassword, validHash);
             }
