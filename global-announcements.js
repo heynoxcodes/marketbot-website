@@ -28,28 +28,32 @@ class GlobalAnnouncementSystem {
 
     async fetchAnnouncements() {
         try {
-            // Primary: Use localStorage for reliable storage
-            const stored = localStorage.getItem('marketbot_global_announcements');
-            if (stored) {
-                const announcements = JSON.parse(stored);
-                return this.filterExpiredAnnouncements(announcements);
-            }
-            
-            // Fallback: Try external source
-            const response = await fetch(this.baseUrl + '?t=' + Date.now(), {
+            // Primary: Fetch from global announcements file
+            const response = await fetch('/admin/global-announcements.json?t=' + Date.now(), {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
 
             if (response.ok) {
-                const announcements = await response.json();
-                const filtered = this.filterExpiredAnnouncements(announcements);
-                // Store locally for future use
-                localStorage.setItem('marketbot_global_announcements', JSON.stringify(filtered));
-                return filtered;
+                const data = await response.json();
+                const announcements = data.announcements || [];
+                console.log('Fetched global announcements from server:', announcements.length);
+                return this.filterExpiredAnnouncements(announcements);
             }
         } catch (error) {
-            console.warn('Failed to fetch announcements:', error);
+            console.warn('Failed to fetch global announcements from server:', error);
+        }
+
+        // Fallback: Use localStorage
+        try {
+            const stored = localStorage.getItem('marketbot_global_announcements');
+            if (stored) {
+                const announcements = JSON.parse(stored);
+                console.log('Using localStorage fallback announcements:', announcements.length);
+                return this.filterExpiredAnnouncements(announcements);
+            }
+        } catch (error) {
+            console.warn('Failed to fetch announcements from localStorage:', error);
         }
 
         return [];
