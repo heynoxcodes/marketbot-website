@@ -27,6 +27,11 @@ class GlobalAnnouncementSystem {
     }
 
     async fetchAnnouncements() {
+        // Use true global storage if available
+        if (window.trueGlobalStorage) {
+            return await window.trueGlobalStorage.fetchAllAnnouncements();
+        }
+
         try {
             // Try to fetch from GitHub (static JSON file)
             const response = await fetch(this.baseUrl + '?t=' + Date.now(), {
@@ -44,7 +49,7 @@ class GlobalAnnouncementSystem {
             console.warn('Failed to fetch from server, using local storage');
         }
 
-        // Fallback to localStorage for GitHub Pages
+        // Fallback to localStorage
         return this.getFallbackAnnouncements();
     }
 
@@ -54,19 +59,27 @@ class GlobalAnnouncementSystem {
     }
 
     async createAnnouncement(text, type, author, duration) {
-        // For GitHub Pages, we use localStorage as the primary storage
-        // This creates a "global" effect by using a shared key across devices
+        // Use true global storage if available
+        if (window.trueGlobalStorage) {
+            const announcement = await window.trueGlobalStorage.createAnnouncement(text, type, author, duration);
+            await this.loadAndDisplayAnnouncements();
+            return announcement;
+        }
+        
+        // Fallback to enhanced localStorage
         this.createFallbackAnnouncement(text, type, author, duration);
         await this.loadAndDisplayAnnouncements();
-        
-        // Show instructions for true global deployment
-        if (window.location.hostname === 'getmarketbot.store') {
-            console.log('📢 Announcement created locally. For true global announcements across all devices, integrate with a backend service.');
-        }
     }
 
     async deleteAnnouncement(id) {
-        // For GitHub Pages, we use localStorage
+        // Use true global storage if available
+        if (window.trueGlobalStorage) {
+            await window.trueGlobalStorage.deleteAnnouncement(id);
+            await this.loadAndDisplayAnnouncements();
+            return;
+        }
+
+        // Fallback to localStorage
         this.deleteFallbackAnnouncement(id);
         await this.loadAndDisplayAnnouncements();
     }
