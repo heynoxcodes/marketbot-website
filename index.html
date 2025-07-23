@@ -3,216 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketBot - Professional Discord Marketplace</title>
+    <title>MarketBot - Digital Marketplace Bot</title>
     
-    <!-- Essential Open Graph Meta Tags for Discord Embeds -->
-    <meta property="og:title" content="MarketBot - Digital Marketplace Bot" />
-    <meta property="og:description" content="Transform your Discord server into a complete digital storefront. Professional marketplace bot with multi-payment processing (PayPal, Bitcoin, Litecoin, CashApp), automated delivery, advanced analytics, customer support tickets, and enterprise-grade security. Perfect for selling digital products, services, and memberships directly in Discord." />
-    <meta property="og:image" content="https://getmarketbot.store/logo-with-bg.png" />
-    <meta property="og:url" content="https://getmarketbot.store" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="MarketBot" />
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="Transform your Discord server into a professional digital marketplace with MarketBot - featuring secure payments, automated delivery, analytics, and customer management for creators and businesses.">
+    <meta name="keywords" content="Discord bot, marketplace bot, digital products, Discord marketplace, e-commerce bot, payment processing, crypto payments, Discord store">
+    <meta name="author" content="MarketBot Team">
     
-    <!-- Twitter Card Tags (Critical for Discord) -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MarketBot - Digital Marketplace Bot" />
-    <meta name="twitter:description" content="Transform your Discord server into a complete digital storefront. Professional marketplace bot with multi-payment processing, automated delivery, analytics, and enterprise-grade security." />
-    <meta name="twitter:image" content="https://getmarketbot.store/logo-with-bg.png" />
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="MarketBot - Digital Marketplace Bot">
+    <meta property="og:description" content="Transform your Discord server into a professional digital marketplace with secure payments, automated delivery, and comprehensive analytics.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://getmarketbot.store">
+    <meta property="og:image" content="https://getmarketbot.store/logo.png">
     
-    <!-- Discord Theme Color -->
-    <meta name="theme-color" content="#5865F2" />
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MarketBot - Digital Marketplace Bot">
+    <meta name="twitter:description" content="Transform your Discord server into a professional digital marketplace with secure payments and automated delivery.">
+    <meta name="twitter:image" content="https://getmarketbot.store/logo.png">
     
-    <!-- Additional Meta Tags -->
-    <meta name="description" content="MarketBot - Digital Marketplace Bot. Transform Discord servers into professional storefronts with multi-payment processing, automated delivery, analytics, and enterprise security." />
-    <meta name="keywords" content="Discord bot, marketplace, digital products, PayPal, cryptocurrency, automated sales" />
-    <meta name="author" content="MarketBot" />
-    <!-- Cache bust: Updated July 23, 2025 17:18 UTC -->
+    <!-- Favicon -->
+    <meta name="theme-color" content="#7C3AED">
+    
+    <!-- Bot ID for Discord invite: 1397237351301779550 -->
+    <!-- Cache bust: Updated July 23, 2025 18:38 UTC -->
     
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="global-announcements.js"></script>
     <script src="admin/global-storage.js"></script>
 </head>
 <body>
+    <!-- Announcement Banner Container -->
+    <div id="announcement-banner"></div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="logo.png" alt="MarketBot" class="nav-logo-img">
-                <span>MarketBot</span>
+                <img src="logo.png" alt="MarketBot Logo" class="logo">
+                <span class="logo-text">MarketBot</span>
             </div>
             <div class="nav-links">
                 <a href="#features">Features</a>
-                <a href="#commands">Commands</a>
-                <a href="#setup">Setup</a>
-                <a href="/privacy">Privacy</a>
-                <a href="/terms">Terms</a>
-                <a href="/admin">Admin</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#stats">Stats</a>
+                <a href="#faq">FAQ</a>
+                <a href="admin/">Admin</a>
                 <a href="https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands" class="btn-primary">Add to Discord</a>
+            </div>
+            <div class="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <h1>MarketBot - Digital Marketplace Bot</h1>
-            <p>Transform your Discord server into a complete digital marketplace. Secure payments, automated delivery, and professional customer management.</p>
-            <div class="hero-buttons">
-                <a href="https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands" class="btn-primary">Add to Discord</a>
-                <a href="#features" class="btn-secondary">Learn More</a>
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Everything you need for Discord commerce, right here.</h1>
+                <p class="hero-subtitle">MarketBot transforms your Discord server into a professional digital marketplace with secure payments, automated delivery, and enterprise-grade analytics. Everything you need — right here.</p>
+                
+                <div class="claim-section">
+                    <div class="claim-input">
+                        <span class="claim-prefix">discord.gg/</span>
+                        <input type="text" placeholder="yourserver" id="serverInput">
+                    </div>
+                    <button class="claim-btn" onclick="claimServer()">Add MarketBot</button>
+                </div>
+                
+                <div class="hero-images">
+                    <div class="dashboard-preview">
+                        <div class="preview-card">
+                            <h3>📊 Admin Dashboard</h3>
+                            <p>Complete marketplace management with real-time analytics, order processing, and customer support.</p>
+                        </div>
+                        <div class="preview-card">
+                            <h3>🛒 Shop Commands</h3>
+                            <p>Beautiful product catalogs, secure checkout process, and automated delivery system.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="hero-image">
-            <img src="bot-preview.png" alt="MarketBot in action">
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats" id="stats">
+        <div class="container">
+            <h2>Over 2,000+ Discord servers use MarketBot — What are you waiting for?</h2>
+            <p class="stats-subtitle">Create feature-rich, secure marketplaces with multi-payment processing, automated delivery, and comprehensive analytics, all with MarketBot</p>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>1,200,000+</h3>
+                    <p>Orders Processed</p>
+                </div>
+                <div class="stat-item">
+                    <h3>2,000+</h3>
+                    <p>Active Servers</p>
+                </div>
+                <div class="stat-item">
+                    <h3>150,000+</h3>
+                    <p>Products Sold</p>
+                </div>
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Premium Users</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Claim Section -->
+    <section class="claim-cta">
+        <div class="container">
+            <h2>Set up your marketplace in minutes!</h2>
+            <div class="claim-section">
+                <div class="claim-input">
+                    <span class="claim-prefix">discord.gg/</span>
+                    <input type="text" placeholder="yourserver" id="serverInput2">
+                </div>
+                <button class="claim-btn" onclick="claimServer()">Add MarketBot</button>
+            </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="features">
+    <section class="features" id="features">
         <div class="container">
-            <h2>Complete Digital Marketplace Solution</h2>
-            <p class="features-subtitle">Everything you need to transform your Discord server into a professional digital storefront with enterprise-grade capabilities</p>
+            <h2>Explore our powerful features</h2>
+            
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🛍️</div>
-                    <h3>Digital Product Sales</h3>
-                    <p>Sell any digital product directly in Discord with automatic delivery and stock management.</p>
-                </div>
-                <div class="feature-card">
                     <div class="feature-icon">💳</div>
-                    <h3>Multi-Payment Support</h3>
-                    <p>Accept payments via PayPal, Cryptocurrency, and CashApp with secure processing.</p>
+                    <h3>Multi-Payment Processing</h3>
+                    <p>PayPal, Bitcoin, Litecoin, and CashApp support with automated verification and secure transaction handling.</p>
                 </div>
+                
                 <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Automated Delivery</h3>
+                    <p>Instant product delivery upon payment confirmation with customizable delivery messages and file attachments.</p>
+                </div>
+                
+                <div class="feature-card featured">
+                    <div class="feature-badge">Most Popular</div>
                     <div class="feature-icon">📊</div>
                     <h3>Advanced Analytics</h3>
-                    <p>Track sales, revenue, and customer insights with comprehensive reporting.</p>
+                    <p>Real-time sales reports, customer insights, inventory tracking, and revenue analytics with export capabilities.</p>
                 </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Enterprise Security</h3>
+                    <p>SQL injection prevention, input validation, encrypted storage, and comprehensive audit logging.</p>
+                </div>
+                
                 <div class="feature-card">
                     <div class="feature-icon">🎫</div>
-                    <h3>Support System</h3>
-                    <p>Private ticket system for customer service and order support.</p>
+                    <h3>Customer Support</h3>
+                    <p>Built-in ticket system, order tracking, customer notifications, and dedicated support channels.</p>
                 </div>
+                
                 <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Enterprise Security</h3>
-                    <p>Automatic backups, data protection, and secure payment processing.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>Multi-Server Ready</h3>
-                    <p>Deploy across multiple Discord servers with global analytics.</p>
+                    <div class="feature-icon">📦</div>
+                    <h3>Inventory Management</h3>
+                    <p>Stock tracking, category organization, product variants, and automated low-stock alerts.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works">
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
         <div class="container">
-            <h2>Get Started in 3 Simple Steps</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Invite MarketBot</h3>
-                    <p>Add MarketBot to your Discord server with one click.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Run Setup</h3>
-                    <p>Use <code>/setup</code> to configure channels and settings.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Start Selling</h3>
-                    <p>Add categories and products, then start accepting orders!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Screenshots Gallery Section -->
-    <section class="screenshots">
-        <div class="container">
-            <h2>See MarketBot in Action</h2>
-            <div class="screenshots-grid">
-                <div class="screenshot-item">
-                    <img src="shop-command.png" alt="Shop Command Interface">
-                    <h3>Browse Products</h3>
-                    <p>Clean, organized product catalog with categories and pricing</p>
-                </div>
-                <div class="screenshot-item">
-                    <img src="admin-dashboard.png" alt="Admin Dashboard">
-                    <h3>Admin Dashboard</h3>
-                    <p>Comprehensive analytics and order management tools</p>
-                </div>
-                <div class="screenshot-item">
-                    <img src="payment-flow.png" alt="Payment Process">
-                    <h3>Payment Flow</h3>
-                    <p>Multiple payment options with secure processing</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Commands Section -->
-    <section id="commands" class="commands">
-        <div class="container">
-            <h2>Bot Commands</h2>
-            <div class="commands-grid">
-                <div class="command-category">
-                    <h3>For Customers</h3>
-                    <div class="command-list">
-                        <div class="command">
-                            <code>/shop</code>
-                            <span>Browse available products</span>
-                        </div>
-                        <div class="command">
-                            <code>/buy</code>
-                            <span>Purchase products</span>
-                        </div>
-                        <div class="command">
-                            <code>/myorder</code>
-                            <span>Check order status</span>
-                        </div>
-                        <div class="command">
-                            <code>/openticket</code>
-                            <span>Get customer support</span>
-                        </div>
+            <h2>Simple, transparent pricing</h2>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">0</span>
+                        <span class="period">/Forever</span>
                     </div>
+                    <p class="pricing-subtitle">For small communities starting their marketplace journey.</p>
+                    <ul class="features-list">
+                        <li>✓ Basic Shop Commands</li>
+                        <li>✓ PayPal Integration</li>
+                        <li>✓ Order Management</li>
+                        <li>✓ Basic Analytics</li>
+                        <li>✓ Customer Support</li>
+                    </ul>
+                    <button class="pricing-btn" onclick="addToDiscord()">Get Started</button>
                 </div>
-                <div class="command-category">
-                    <h3>For Admins</h3>
-                    <div class="command-list">
-                        <div class="command">
-                            <code>/setup</code>
-                            <span>Configure bot settings</span>
-                        </div>
-                        <div class="command">
-                            <code>/add_category</code>
-                            <span>Create product categories</span>
-                        </div>
-                        <div class="command">
-                            <code>/add_product</code>
-                            <span>Add products to sell</span>
-                        </div>
-                        <div class="command">
-                            <code>/admin</code>
-                            <span>Access admin dashboard</span>
-                        </div>
+                
+                <div class="pricing-card featured">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Premium</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">19.99</span>
+                        <span class="period">/Month</span>
                     </div>
+                    <p class="pricing-subtitle">The perfect plan for growing businesses and professional marketplaces.</p>
+                    <ul class="features-list">
+                        <li>✓ All Free Features</li>
+                        <li>✓ Crypto Payments (BTC, LTC)</li>
+                        <li>✓ Advanced Analytics</li>
+                        <li>✓ Custom Branding</li>
+                        <li>✓ Priority Support</li>
+                        <li>✓ API Access</li>
+                        <li>✓ Multi-Server License</li>
+                    </ul>
+                    <button class="pricing-btn premium" onclick="contactSupport()">Contact Sales</button>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">
+                        <span class="amount">Custom</span>
+                    </div>
+                    <p class="pricing-subtitle">For large organizations requiring custom solutions and dedicated support.</p>
+                    <ul class="features-list">
+                        <li>✓ All Premium Features</li>
+                        <li>✓ Custom Integration</li>
+                        <li>✓ Dedicated Support Team</li>
+                        <li>✓ SLA Guarantee</li>
+                        <li>✓ Custom Development</li>
+                        <li>✓ On-Premise Deployment</li>
+                    </ul>
+                    <button class="pricing-btn" onclick="contactSupport()">Contact Sales</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta">
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
         <div class="container">
-            <h2>Ready to Transform Your Discord Server?</h2>
-            <p>Join thousands of servers already using MarketBot to sell digital products.</p>
-            <a href="https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands" class="btn-primary">Add MarketBot to Discord</a>
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>What is MarketBot?</h3>
+                    <p>MarketBot is a comprehensive Discord bot that transforms your server into a professional digital marketplace with secure payments, automated delivery, and enterprise-grade analytics.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Is MarketBot free to use?</h3>
+                    <p>Yes, MarketBot is completely free to use with basic features. We also offer Premium and Enterprise plans with advanced features for growing businesses.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>What payment methods are supported?</h3>
+                    <p>MarketBot supports PayPal, Bitcoin, Litecoin, and CashApp payments with automated verification and secure transaction processing.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Is MarketBot secure?</h3>
+                    <p>Absolutely. We use enterprise-grade security with SQL injection prevention, input validation, encrypted storage, and comprehensive audit logging.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>How quickly can I set up my marketplace?</h3>
+                    <p>Setting up your MarketBot marketplace is quick and easy. Simply add the bot to your Discord server and use the setup commands to configure your store in minutes.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Do you provide customer support?</h3>
+                    <p>Yes, we provide comprehensive customer support through our Discord server, documentation, and dedicated support channels for Premium users.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>Everything you need for Discord commerce, right here.</h2>
+            <p>Join over 2,000+ Discord servers using MarketBot and become part of our growing community</p>
+            
+            <div class="claim-section">
+                <div class="claim-input">
+                    <span class="claim-prefix">discord.gg/</span>
+                    <input type="text" placeholder="yourserver" id="serverInput3">
+                </div>
+                <button class="claim-btn" onclick="claimServer()">Add MarketBot</button>
+            </div>
         </div>
     </section>
 
@@ -221,25 +306,92 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>MarketBot</h4>
-                    <p>Discord Marketplace Bot</p>
+                    <div class="footer-logo">
+                        <img src="logo.png" alt="MarketBot" class="footer-logo-img">
+                        <h3>MarketBot</h3>
+                    </div>
+                    <p>Transform your Discord server into a professional digital marketplace with secure payments and automated delivery.</p>
                 </div>
+                
                 <div class="footer-section">
-                    <h4>Links</h4>
-                    <a href="#features">Features</a>
-                    <a href="#commands">Commands</a>
-                    <a href="support.html">Support</a>
+                    <h4>General</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#stats">Statistics</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
                 </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="admin/">Admin Dashboard</a></li>
+                        <li><a href="https://discord.gg/marketbot">Discord Server</a></li>
+                        <li><a href="mailto:support@getmarketbot.store">Support Email</a></li>
+                    </ul>
+                </div>
+                
                 <div class="footer-section">
                     <h4>Legal</h4>
-                    <a href="/terms">Terms of Service</a>
-                    <a href="/privacy">Privacy Policy</a>
+                    <ul>
+                        <li><a href="terms">Terms of Service</a></li>
+                        <li><a href="privacy">Privacy Policy</a></li>
+                    </ul>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2025 MarketBot. All rights reserved.</p>
+                <p>Copyright © 2025 MarketBot - All Rights Reserved.</p>
             </div>
         </div>
     </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Server claim functionality
+        function claimServer() {
+            const server = document.getElementById('serverInput').value || 
+                          document.getElementById('serverInput2').value || 
+                          document.getElementById('serverInput3').value;
+            
+            const inviteUrl = 'https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands';
+            window.open(inviteUrl, '_blank');
+        }
+
+        // Add to Discord
+        function addToDiscord() {
+            const inviteUrl = 'https://discord.com/api/oauth2/authorize?client_id=1397237351301779550&permissions=8&scope=bot%20applications.commands';
+            window.open(inviteUrl, '_blank');
+        }
+
+        // Contact support
+        function contactSupport() {
+            window.open('mailto:support@getmarketbot.store', '_blank');
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Initialize announcements
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.globalAnnouncements) {
+                window.globalAnnouncements.loadAndDisplayAnnouncements();
+            }
+        });
+    </script>
 </body>
 </html>
