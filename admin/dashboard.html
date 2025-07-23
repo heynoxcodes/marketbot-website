@@ -392,8 +392,8 @@
 </style>
 
 <script>
-    // Dashboard functionality
-    async function publishAnnouncement() {
+    // Dashboard functionality - make functions globally accessible
+    window.publishAnnouncement = async function publishAnnouncement() {
         const text = document.getElementById('announcementText').value.trim();
         const type = document.getElementById('announcementType').value;
         const duration = parseInt(document.getElementById('duration').value);
@@ -455,7 +455,7 @@
         }
     }
 
-    async function loadActiveAnnouncements() {
+    window.loadActiveAnnouncements = async function loadActiveAnnouncements() {
         try {
             let announcements = [];
             
@@ -498,7 +498,7 @@
         }
     }
 
-    async function removeAnnouncement(id) {
+    window.removeAnnouncement = async function removeAnnouncement(id) {
         try {
             await window.parent.globalAnnouncements.deleteAnnouncement(id);
             showSuccess('Announcement removed successfully!');
@@ -508,7 +508,7 @@
         }
     }
 
-    function showError(message) {
+    window.showError = function showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;
@@ -519,7 +519,7 @@
         setTimeout(() => errorDiv.remove(), 5000);
     }
 
-    function showSuccess(message) {
+    window.showSuccess = function showSuccess(message) {
         const successDiv = document.createElement('div');
         successDiv.className = 'success-message';
         successDiv.textContent = message;
@@ -530,7 +530,7 @@
         setTimeout(() => successDiv.remove(), 3000);
     }
 
-    function updatePreview() {
+    window.updatePreview = function updatePreview() {
         const text = document.getElementById('announcementText').value.trim() || 'Your announcement will appear here...';
         const type = document.getElementById('announcementType').value;
         const author = document.getElementById('authorName').value.trim() || 'Your Name';
