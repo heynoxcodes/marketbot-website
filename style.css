@@ -131,6 +131,53 @@ body {
     box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
 }
 
+/* Animated Add Bot Button */
+.add-bot-btn {
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-bot-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.add-bot-btn:hover::before {
+    left: 100%;
+}
+
+.add-bot-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+}
+
+.add-bot-btn .btn-icon {
+    transition: transform 0.3s ease;
+    font-size: 16px;
+}
+
+.add-bot-btn:hover .btn-icon {
+    transform: translateX(5px);
+}
+
 .mobile-menu {
     display: none;
     flex-direction: column;
@@ -250,14 +297,43 @@ body {
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.claim-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.claim-btn:hover::before {
+    left: 100%;
 }
 
 .claim-btn:hover {
     background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.4);
+}
+
+.claim-btn .btn-icon {
+    transition: transform 0.3s ease;
+    font-size: 16px;
+}
+
+.claim-btn:hover .btn-icon {
+    transform: translateX(3px);
 }
 
 .hero-images {
