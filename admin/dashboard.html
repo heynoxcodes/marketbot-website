@@ -517,6 +517,9 @@
         if (typeSelect) typeSelect.addEventListener('change', updatePreview);
         if (authorInput) authorInput.addEventListener('input', updatePreview);
 
+        // Initialize preview
+        updatePreview();
+
         // Load active announcements
         loadActiveAnnouncements();
     });
