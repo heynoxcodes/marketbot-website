@@ -3,47 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketBot Admin Access</title>
+    <title>MarketBot Admin Dashboard</title>
     <link rel="icon" href="../logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Load global announcement system -->
+    <!-- Load announcement system dependencies -->
     <script src="../global-announcements.js"></script>
     <script src="global-storage.js"></script>
-</head>
-<body>
-    <!-- Content will be dynamically loaded by auth system -->
-    <div id="app-container">
-        <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <p>Loading admin interface...</p>
-        </div>
-    </div>
-
+    
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
         }
 
-        .loading-container {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 100%);
+            color: #E2E8F0;
             min-height: 100vh;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            z-index: 9999;
         }
 
         .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(124, 58, 237, 0.2);
+            border-top: 4px solid #7C3AED;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
         }
 
         @keyframes spin {
@@ -51,426 +55,788 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Login Form Styles */
+        .loading-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #E2E8F0;
+        }
+
+        /* Login Form */
         .login-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
         }
-        
-        .login-form {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+        .login-card {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 24px;
+            padding: 3rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
             text-align: center;
+            margin-bottom: 2.5rem;
         }
-        
+
         .login-logo {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 20px;
-            border-radius: 10px;
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
         }
-        
-        .login-form h2 {
-            color: #333;
-            margin-bottom: 10px;
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
         }
-        
-        .login-form p {
-            color: #666;
-            margin-bottom: 30px;
+
+        .login-subtitle {
+            color: #94A3B8;
+            font-size: 1rem;
         }
-        
+
         .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+            margin-bottom: 2rem;
         }
-        
-        .form-group label {
+
+        .form-label {
             display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
+            color: #E2E8F0;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        
-        .form-group input {
+
+        .form-input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
+            background: rgba(45, 55, 72, 0.6);
+            border: 2px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            color: #E2E8F0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
-        
-        .form-group input:focus {
+
+        .form-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+            background: rgba(45, 55, 72, 0.8);
         }
-        
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+
+        .login-btn {
             width: 100%;
+            background: linear-gradient(135deg, #7C3AED, #A855F7);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FCA5A5;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .easter-egg {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .back-link {
+            color: #7C3AED;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #A855F7;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            min-height: 100vh;
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dashboard-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .title-text h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.25rem;
+        }
+
+        .title-text p {
+            color: #94A3B8;
+            font-size: 0.875rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .session-timer {
+            background: rgba(45, 55, 72, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #94A3B8;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FCA5A5;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .card-badge {
+            background: linear-gradient(135deg, #7C3AED, #A855F7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Announcement Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #E2E8F0;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            background: rgba(45, 55, 72, 0.6);
+            border: 2px solid rgba(74, 85, 104, 0.4);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #E2E8F0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-hint {
+            color: #94A3B8;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .preview-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(45, 55, 72, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .preview-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #E2E8F0;
+            margin-bottom: 1rem;
+        }
+
+        .announcement-preview {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .announcement-preview.info {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+        }
+
+        .announcement-preview.warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+        }
+
+        .preview-icon {
+            font-size: 1.25rem;
+        }
+
+        .preview-author {
+            opacity: 0.9;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7C3AED, #A855F7);
+            color: white;
+        }
+
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
         }
-        
-        .btn-secondary {
-            background: #6c757d;
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
             color: white;
         }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
         }
-        
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            border: 1px solid #f5c6cb;
-        }
-        
+
         .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            border: 1px solid #c3e6cb;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86EFAC;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
         }
-        
-        .login-footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+
+        /* Active Announcements */
+        .announcements-list {
+            margin-top: 2rem;
         }
-        
-        .login-footer a {
-            color: #667eea;
-            text-decoration: none;
+
+        .announcement-item {
+            background: rgba(45, 55, 72, 0.3);
+            border: 1px solid rgba(74, 85, 104, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
         }
-        
-        .login-footer a:hover {
-            text-decoration: underline;
+
+        .announcement-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #94A3B8;
+        }
+
+        .announcement-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .announcement-type.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+        }
+
+        .announcement-type.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #FCD34D;
+        }
+
+        .announcement-text {
+            color: #E2E8F0;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* System Status */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .status-item {
+            background: rgba(45, 55, 72, 0.3);
+            border: 1px solid rgba(74, 85, 104, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .status-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #E2E8F0;
+            margin-bottom: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86EFAC;
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #7C3AED;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #94A3B8;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .dashboard-main {
+                padding: 1rem;
+            }
+
+            .login-card {
+                padding: 2rem;
+            }
         }
     </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing Admin Dashboard...</div>
+    </div>
 
-    <!-- Secure Admin Authentication System -->
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container" style="display: none;">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="../logo.png" alt="MarketBot" class="login-logo">
+                <h1 class="login-title">Admin Access</h1>
+                <p class="login-subtitle">Enter credentials to access the dashboard</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" class="form-input" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    Access Dashboard
+                </button>
+
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <a href="../" class="back-link">← Back to MarketBot</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="dashboard-title">
+                    <img src="../logo.png" alt="MarketBot" class="dashboard-logo">
+                    <div class="title-text">
+                        <h1>MarketBot Admin</h1>
+                        <p>Global Management Dashboard</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div id="sessionTimer" class="session-timer">Session: 30:00</div>
+                    <button onclick="adminSystem.logout()" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <!-- Analytics Overview -->
+            <div class="analytics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalServers">0</div>
+                    <div class="metric-label">Active Servers</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalUsers">0</div>
+                    <div class="metric-label">Total Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalRevenue">$0</div>
+                    <div class="metric-label">Total Revenue</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="activeAnnouncements">0</div>
+                    <div class="metric-label">Active Announcements</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Global Announcements -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Global Announcements</h2>
+                        <span class="card-badge">Live System</span>
+                    </div>
+
+                    <form id="announcementForm">
+                        <div class="form-group">
+                            <label class="form-label" for="announcementText">Announcement Text</label>
+                            <textarea id="announcementText" class="form-textarea" rows="3" placeholder="Enter your announcement message..." maxlength="200"></textarea>
+                            <div class="form-hint">Maximum 200 characters</div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="announcementType">Type</label>
+                                <select id="announcementType" class="form-select">
+                                    <option value="info">Info (Blue)</option>
+                                    <option value="warning">Warning (Orange)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="duration">Duration (hours)</label>
+                                <input type="number" id="duration" class="form-input" min="1" max="168" value="24">
+                                <div class="form-hint">1-168 hours</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="authorName">Author Name</label>
+                            <input type="text" id="authorName" class="form-input" placeholder="Enter your name" maxlength="50">
+                        </div>
+
+                        <div class="preview-section">
+                            <div class="preview-title">Live Preview</div>
+                            <div id="announcementPreview" class="announcement-preview info">
+                                <span class="preview-icon">ℹ️</span>
+                                <span class="preview-text">Your announcement will appear here...</span>
+                                <span class="preview-author">— Your Name</span>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="adminSystem.publishAnnouncement()" class="btn btn-primary">
+                            Publish Global Announcement
+                        </button>
+
+                        <div id="publishMessage" class="success-message" style="display: none;"></div>
+                    </form>
+
+                    <div class="announcements-list">
+                        <h3 style="color: #FFFFFF; margin-bottom: 1rem;">Active Announcements</h3>
+                        <div id="activeAnnouncementsList">
+                            <p style="color: #94A3B8;">Loading announcements...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2 class="card-title">System Status</h2>
+                        <span class="card-badge">Real-time</span>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-title">Website</div>
+                            <span class="status-badge status-online">Online</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-title">Discord Bot</div>
+                            <span class="status-badge status-online">Running</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-title">Database</div>
+                            <span class="status-badge status-online">Connected</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-title">Announcements</div>
+                            <span class="status-badge status-online">Active</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-title">Analytics</div>
+                            <span class="status-badge status-online">Tracking</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-title">Payments</div>
+                            <span class="status-badge status-online">Processing</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div style="margin-top: 2rem;">
+                        <h3 style="color: #FFFFFF; margin-bottom: 1rem;">Quick Actions</h3>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="adminSystem.refreshStats()" class="btn btn-primary" style="flex: 1;">
+                                Refresh Stats
+                            </button>
+                            <button onclick="adminSystem.clearCache()" class="btn btn-danger" style="flex: 1;">
+                                Clear Cache
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Features -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Advanced Management</h2>
+                    <span class="card-badge">Admin Tools</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="status-item">
+                        <div class="status-title">Bot Commands</div>
+                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">26 slash commands active</p>
+                        <button onclick="adminSystem.viewBotStats()" class="btn btn-primary">View Bot Stats</button>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">User Reports</div>
+                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Bug reports and feedback</p>
+                        <button onclick="adminSystem.viewReports()" class="btn btn-primary">View Reports</button>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">Server Analytics</div>
+                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Cross-server performance</p>
+                        <button onclick="adminSystem.viewAnalytics()" class="btn btn-primary">View Analytics</button>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-title">System Maintenance</div>
+                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Database and cleanup tools</p>
+                        <button onclick="adminSystem.maintenanceMode()" class="btn btn-danger">Maintenance</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
     <script>
-        // Secure admin authentication system
-        class SecureAdminAuth {
-            constructor() {
-                this.sessionKey = 'marketbot_admin_session';
-                this.maxSessionTime = 30 * 60 * 1000; // 30 minutes
-                this.init();
-            }
-
-            init() {
-                this.checkExistingSession();
-            }
-
-            // Secure password verification using SHA-256 hashing
-            async verifyPassword(password) {
-                // Easter egg for specific password
-                if (password === 'vyxlez2010') {
-                    this.showEasterEgg();
-                    return false;
-                }
-                
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password + 'marketbot_security_salt_2025');
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                
-                // Server-side equivalent hash for 'marketbot_admin_2025'
-                const validHash = 'bc683774a01cd54c2e9ffb13865dbda7d90cdfa106eefe51ad15292af2d37dbb';
-                
-                return this.constantTimeCompare(hashedPassword, validHash);
-            }
-
-            // Easter egg for special password
-            showEasterEgg() {
-                const errorDiv = document.getElementById('loginError');
-                if (errorDiv) {
-                    errorDiv.innerHTML = `
-                        <div style="
-                            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-                            color: white;
-                            padding: 15px;
-                            border-radius: 8px;
-                            text-align: center;
-                            border: none;
-                            font-weight: 600;
-                            animation: shake 0.5s ease-in-out;
-                        ">
-                            🚫 You're not hacking me buddy! 🚫
-                        </div>
-                        <style>
-                            @keyframes shake {
-                                0%, 100% { transform: translateX(0); }
-                                25% { transform: translateX(-5px); }
-                                75% { transform: translateX(5px); }
-                            }
-                        </style>
-                    `;
-                    errorDiv.style.display = 'block';
-                    
-                    // Clear the password field
-                    const passwordField = document.getElementById('adminPassword');
-                    if (passwordField) {
-                        passwordField.value = '';
-                        passwordField.style.animation = 'shake 0.5s ease-in-out';
-                    }
-                    
-                    // Hide after 5 seconds
-                    setTimeout(() => {
-                        errorDiv.style.display = 'none';
-                        if (passwordField) {
-                            passwordField.style.animation = '';
-                        }
-                    }, 5000);
-                }
-            }
-
-            // Prevent timing attacks with constant-time comparison
-            constantTimeCompare(a, b) {
-                if (a.length !== b.length) return false;
-                let result = 0;
-                for (let i = 0; i < a.length; i++) {
-                    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-                }
-                return result === 0;
-            }
-
-            // Create secure session
-            createSession() {
-                const sessionData = {
-                    authenticated: true,
-                    timestamp: Date.now(),
-                    token: this.generateSecureToken()
-                };
-                localStorage.setItem(this.sessionKey, JSON.stringify(sessionData));
-            }
-
-            // Generate cryptographically secure session token
-            generateSecureToken() {
-                const array = new Uint8Array(32);
-                crypto.getRandomValues(array);
-                return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-            }
-
-            // Validate current session
-            isAuthenticated() {
-                const session = this.getSession();
-                if (!session) return false;
-                
-                const sessionAge = Date.now() - session.timestamp;
-                if (sessionAge > this.maxSessionTime) {
-                    this.logout();
-                    return false;
-                }
-                
-                return session.authenticated === true && session.token;
-            }
-
-            getSession() {
-                try {
-                    const sessionStr = localStorage.getItem(this.sessionKey);
-                    return sessionStr ? JSON.parse(sessionStr) : null;
-                } catch (error) {
-                    return null;
-                }
-            }
-
-            checkExistingSession() {
-                if (this.isAuthenticated()) {
-                    this.loadAdminDashboard();
-                } else {
-                    this.showLoginForm();
-                }
-            }
-
-            showLoginForm() {
-                document.getElementById('app-container').innerHTML = `
-                    <div class="login-container">
-                        <div class="login-form">
-                            <img src="../logo.png" alt="MarketBot" class="login-logo">
-                            <h2>Admin Access</h2>
-                            <p>Enter credentials to access the admin dashboard</p>
-                            
-                            <form id="loginForm">
-                                <div class="form-group">
-                                    <label for="adminPassword">Admin Password:</label>
-                                    <input type="password" id="adminPassword" required autocomplete="new-password">
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary">Access Dashboard</button>
-                                
-                                <div id="loginError" class="error-message" style="display: none;"></div>
-                            </form>
-                            
-                            <div class="login-footer">
-                                <p><a href="../">← Back to MarketBot</a></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    await this.handleLogin();
-                });
-
-                // Focus password field
-                document.getElementById('adminPassword').focus();
-            }
-
-            async handleLogin() {
-                const password = document.getElementById('adminPassword').value;
-                const errorDiv = document.getElementById('loginError');
-                
-                if (!password) {
-                    this.showError('Please enter the admin password');
-                    return;
-                }
-
-                try {
-                    const isValid = await this.verifyPassword(password);
-                    
-                    if (isValid) {
-                        this.createSession();
-                        this.loadAdminDashboard();
-                    } else {
-                        this.showError('Invalid credentials. Access denied.');
-                        document.getElementById('adminPassword').value = '';
-                        
-                        // Security delay after failed attempt
-                        setTimeout(() => {
-                            document.getElementById('adminPassword').disabled = false;
-                        }, 2000);
-                        document.getElementById('adminPassword').disabled = true;
-                    }
-                } catch (error) {
-                    this.showError('Authentication error. Please try again.');
-                }
-            }
-
-            showError(message) {
-                const errorDiv = document.getElementById('loginError');
-                errorDiv.textContent = message;
-                errorDiv.style.display = 'block';
-                
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 5000);
-            }
-
-            async loadAdminDashboard() {
-                try {
-                    const response = await fetch('dashboard.html');
-                    const dashboardHtml = await response.text();
-                    
-                    document.getElementById('app-container').innerHTML = dashboardHtml;
-                    this.initializeDashboard();
-                } catch (error) {
-                    console.error('Failed to load dashboard.html, using fallback:', error);
-                    this.createFallbackDashboard();
-                }
-            }
-
-            initializeDashboard() {
-                // Add session timeout warning
-                this.setupSessionTimeout();
-                
-                // Initialize announcement system with delay to ensure DOM is ready
-                setTimeout(() => {
-                    console.log('Initializing dashboard...');
-                    console.log('trueGlobalStorage available:', !!window.trueGlobalStorage);
-                    console.log('globalAnnouncements available:', !!window.globalAnnouncements);
-                    
-                    if (typeof loadActiveAnnouncements === 'function') {
-                        console.log('Loading active announcements...');
-                        loadActiveAnnouncements();
-                    } else {
-                        console.warn('loadActiveAnnouncements function not found');
-                    }
-                }, 500);
-            }
-
-            createFallbackDashboard() {
-                document.getElementById('app-container').innerHTML = `
-                    <div class="admin-container">
-                        <header class="admin-header">
-                            <div class="header-content">
-                                <div class="admin-title">
-                                    <img src="../logo.png" alt="MarketBot" class="admin-logo" style="width: 40px; height: 40px; border-radius: 8px;">
-                                    <h1>MarketBot Admin Dashboard</h1>
-                                </div>
-                                <button onclick="adminAuth.logout()" class="btn btn-secondary">Logout</button>
-                            </div>
-                        </header>
-
-                        <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-                            <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h2>Admin Dashboard</h2>
-                                <p>Welcome to the secure MarketBot admin interface.</p>
-                                <p>Dashboard functionality loading...</p>
-                            </div>
-                        </main>
-                    </div>
-                `;
-            }
-
-            setupSessionTimeout() {
-                // Warn user 5 minutes before session expires
-                setTimeout(() => {
-                    if (this.isAuthenticated()) {
-                        const warningDiv = document.createElement('div');
-                        warningDiv.className = 'error-message';
-                        warningDiv.textContent = 'Session will expire in 5 minutes. Please save your work.';
-                        warningDiv.style.position = 'fixed';
-                        warningDiv.style.top = '20px';
-                        warningDiv.style.right = '20px';
-                        warningDiv.style.zIndex = '10000';
-                        document.body.appendChild(warningDiv);
-                        
-                        setTimeout(() => warningDiv.remove(), 10000);
-                    }
-                }, this.maxSessionTime - 5 * 60 * 1000);
-            }
-
-            logout() {
-                localStorage.removeItem(this.sessionKey);
-                window.location.reload();
-            }
-        }
-
-        // Initialize secure admin authentication
-        const adminAuth = new SecureAdminAuth();
+        // Initialize the admin system
+        const adminSystem = new SecureAdminSystem();
     </script>
 </body>
 </html>
