@@ -272,7 +272,7 @@ class SecureAdminSystem {
         const duration = parseInt(document.getElementById('duration')?.value);
         const author = document.getElementById('authorName')?.value.trim();
 
-        console.log('Publishing announcement:', { text, type, duration, author });
+        console.log('Publishing global announcement:', { text, type, duration, author });
 
         if (!text || !author) {
             this.showPublishError('Please fill in all required fields');
@@ -290,14 +290,13 @@ class SecureAdminSystem {
         }
 
         try {
-            const announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
-            const existingIndex = announcements.findIndex(ann => ann.author === author);
+            // Get existing announcements
+            let announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
             
-            if (existingIndex !== -1) {
-                this.showPublishError('You already have an active announcement. Please remove it first.');
-                return;
-            }
-
+            // Remove existing announcement from same author (one per author limit)
+            announcements = announcements.filter(ann => ann.author !== author);
+            
+            // Create new announcement
             const announcement = {
                 id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 text: text,
@@ -306,36 +305,41 @@ class SecureAdminSystem {
                 createdAt: new Date().toISOString(),
                 expiresAt: new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
             };
-
+            
             announcements.push(announcement);
+            
+            // Store in localStorage
             localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
             
-            // Broadcast to all tabs
+            // Also store in the global JSON file that gets deployed
+            await this.updateGlobalAnnouncementsFile(announcements);
+            
+            // Broadcast to all tabs and devices
             if (window.BroadcastChannel) {
-                const channel = new BroadcastChannel('marketbot_announcements');
+                const channel = new BroadcastChannel('marketbot_global_announcements');
                 channel.postMessage({
-                    type: 'announcement_update',
+                    type: 'announcements_updated',
                     announcements: announcements,
                     timestamp: Date.now()
                 });
             }
             
-            console.log('Announcement created:', announcement);
+            console.log('Global announcement created:', announcement);
             
             // Clear form
             document.getElementById('announcementText').value = '';
             document.getElementById('authorName').value = '';
             
             // Show success message
-            this.showPublishSuccess('Global announcement published successfully!');
+            this.showPublishSuccess('Global announcement published successfully! Visible to all users worldwide.');
             
             // Refresh list and update analytics
-            this.loadActiveAnnouncements();
+            await this.loadActiveAnnouncements();
             this.updateAnalytics();
             
         } catch (error) {
-            console.error('Failed to publish announcement:', error);
-            this.showPublishError('Failed to publish announcement: ' + error.message);
+            console.error('Failed to publish global announcement:', error);
+            this.showPublishError('Failed to publish global announcement: ' + error.message);
         }
     }
 
@@ -367,21 +371,23 @@ class SecureAdminSystem {
 
     async loadActiveAnnouncements() {
         try {
-            console.log('Loading active announcements...');
+            console.log('Loading global announcements...');
             
+            // Get announcements from localStorage
             let announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
             
-            // Filter expired announcements
+            // Filter out expired announcements
             const now = new Date();
             const originalLength = announcements.length;
             announcements = announcements.filter(ann => new Date(ann.expiresAt) > now);
             
-            // Save cleaned list if anything was removed
+            // Update storage if expired announcements were removed
             if (originalLength !== announcements.length) {
                 localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
+                await this.updateGlobalAnnouncementsFile(announcements);
             }
             
-            console.log('Loaded announcements:', announcements);
+            console.log('Loaded active global announcements:', announcements);
             
             const container = document.getElementById('activeAnnouncementsList');
             if (!container) return;
@@ -398,27 +404,29 @@ class SecureAdminSystem {
                         <span>Created: ${new Date(ann.createdAt).toLocaleString()}</span>
                         <span>Expires: ${new Date(ann.expiresAt).toLocaleString()}</span>
                         <span>Author: ${ann.author}</span>
+                        <span style="color: #86EFAC;">🌍 Global</span>
                     </div>
                     <div class="announcement-text">${ann.text}</div>
                     <button onclick="adminSystem.removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 1rem;">
-                        Remove Announcement
+                        Remove Global Announcement
                     </button>
                 </div>
             `).join('');
             
         } catch (error) {
-            console.error('Failed to load announcements:', error);
+            console.error('Failed to load global announcements:', error);
             const container = document.getElementById('activeAnnouncementsList');
             if (container) {
-                container.innerHTML = '<p style="color: #FCA5A5;">Error loading announcements</p>';
+                container.innerHTML = '<p style="color: #FCA5A5;">Error loading global announcements</p>';
             }
         }
     }
 
     async removeAnnouncement(id) {
         try {
-            console.log('Removing announcement:', id);
+            console.log('Removing global announcement:', id);
             
+            // Get announcements and remove the specified one
             let announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
             const originalLength = announcements.length;
             
@@ -428,35 +436,40 @@ class SecureAdminSystem {
                 throw new Error('Announcement not found');
             }
             
+            // Update localStorage
             localStorage.setItem('marketbot_global_announcements', JSON.stringify(announcements));
             
-            // Broadcast removal to all tabs
+            // Update the global JSON file
+            await this.updateGlobalAnnouncementsFile(announcements);
+            
+            // Broadcast to all tabs and devices
             if (window.BroadcastChannel) {
-                const channel = new BroadcastChannel('marketbot_announcements');
+                const channel = new BroadcastChannel('marketbot_global_announcements');
                 channel.postMessage({
-                    type: 'announcement_update',
+                    type: 'announcements_updated',
                     announcements: announcements,
                     timestamp: Date.now()
                 });
             }
             
-            console.log('Announcement removed successfully');
+            console.log('Global announcement removed successfully');
             
             // Refresh list and update analytics
-            this.loadActiveAnnouncements();
+            await this.loadActiveAnnouncements();
             this.updateAnalytics();
             
         } catch (error) {
-            console.error('Failed to remove announcement:', error);
-            alert('Failed to remove announcement: ' + error.message);
+            console.error('Failed to remove global announcement:', error);
+            alert('Failed to remove global announcement: ' + error.message);
         }
     }
 
-    updateAnalytics() {
+    async updateAnalytics() {
         try {
             // Get real statistics from the stats API
             const realStats = window.marketBotStats ? window.marketBotStats.getStats() : null;
             
+            // Get global announcements count
             const announcements = JSON.parse(localStorage.getItem('marketbot_global_announcements') || '[]');
             const activeCount = announcements.filter(ann => new Date(ann.expiresAt) > new Date()).length;
             
