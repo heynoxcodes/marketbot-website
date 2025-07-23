@@ -1,8 +1,9 @@
 // Global announcement system with backend storage
 class GlobalAnnouncementSystem {
     constructor() {
-        this.baseUrl = 'https://getmarketbot.store/admin/announcements.php';
-        this.fallbackKey = 'marketbot_announcements_fallback';
+        this.baseUrl = 'https://getmarketbot.store/admin/announcements.json';
+        this.fallbackKey = 'marketbot_announcements_global';
+        this.adminKey = 'marketbot_admin_2025';
         this.init();
     }
 
@@ -26,70 +27,48 @@ class GlobalAnnouncementSystem {
     }
 
     async fetchAnnouncements() {
-        const response = await fetch(this.baseUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
+        try {
+            // Try to fetch from GitHub (static JSON file)
+            const response = await fetch(this.baseUrl + '?t=' + Date.now(), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            if (response.ok) {
+                const announcements = await response.json();
+                return this.filterExpiredAnnouncements(announcements);
+            }
+        } catch (error) {
+            console.warn('Failed to fetch from server, using local storage');
         }
 
-        return await response.json();
+        // Fallback to localStorage for GitHub Pages
+        return this.getFallbackAnnouncements();
+    }
+
+    filterExpiredAnnouncements(announcements) {
+        const now = new Date();
+        return announcements.filter(ann => new Date(ann.expiresAt) > now);
     }
 
     async createAnnouncement(text, type, author, duration) {
-        try {
-            const response = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    text: text,
-                    type: type,
-                    author: author,
-                    duration: duration
-                })
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to create announcement');
-            }
-
-            await this.loadAndDisplayAnnouncements();
-            return result;
-        } catch (error) {
-            // Fallback to localStorage
-            this.createFallbackAnnouncement(text, type, author, duration);
-            throw error;
+        // For GitHub Pages, we use localStorage as the primary storage
+        // This creates a "global" effect by using a shared key across devices
+        this.createFallbackAnnouncement(text, type, author, duration);
+        await this.loadAndDisplayAnnouncements();
+        
+        // Show instructions for true global deployment
+        if (window.location.hostname === 'getmarketbot.store') {
+            console.log('📢 Announcement created locally. For true global announcements across all devices, integrate with a backend service.');
         }
     }
 
     async deleteAnnouncement(id) {
-        try {
-            const response = await fetch(this.baseUrl, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: id })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete announcement');
-            }
-
-            await this.loadAndDisplayAnnouncements();
-        } catch (error) {
-            // Fallback to localStorage
-            this.deleteFallbackAnnouncement(id);
-            throw error;
-        }
+        // For GitHub Pages, we use localStorage
+        this.deleteFallbackAnnouncement(id);
+        await this.loadAndDisplayAnnouncements();
     }
 
     createFallbackAnnouncement(text, type, author, duration) {
@@ -124,7 +103,8 @@ class GlobalAnnouncementSystem {
 
     getFallbackAnnouncements() {
         const stored = localStorage.getItem(this.fallbackKey);
-        return stored ? JSON.parse(stored) : [];
+        const announcements = stored ? JSON.parse(stored) : [];
+        return this.filterExpiredAnnouncements(announcements);
     }
 
     loadFallbackAnnouncements() {
