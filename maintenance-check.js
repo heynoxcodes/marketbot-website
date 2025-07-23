@@ -11,33 +11,57 @@
         try {
             console.log('Checking maintenance status...');
             
-            // Check the live maintenance status file with cache busting
-            const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
-                method: 'GET',
-                cache: 'no-cache',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+            // First try to check localStorage for admin-set maintenance mode
+            const localMaintenanceData = localStorage.getItem('marketbot_global_maintenance_status');
+            if (localMaintenanceData) {
+                try {
+                    const data = JSON.parse(localMaintenanceData);
+                    console.log('Local maintenance status found:', data);
+                    
+                    if (data.maintenance_enabled === true) {
+                        console.log('Local maintenance mode is ENABLED - showing maintenance page');
+                        showMaintenancePage(data.message, data.start_time);
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Error parsing local maintenance data:', error);
                 }
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Maintenance status loaded:', data);
-                
-                if (data.maintenance_enabled === true) {
-                    console.log('Maintenance mode is ENABLED - showing maintenance page');
-                    showMaintenancePage(data.message, data.start_time);
-                    return;
-                } else {
-                    console.log('Maintenance mode is DISABLED - site operational');
-                }
-            } else {
-                console.warn('Could not load maintenance status file:', response.status, response.statusText);
             }
+            
+            // Fallback: Check the live maintenance status file
+            try {
+                const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Server maintenance status loaded:', data);
+                    
+                    if (data.maintenance_enabled === true) {
+                        console.log('Server maintenance mode is ENABLED - showing maintenance page');
+                        showMaintenancePage(data.message, data.start_time);
+                        return;
+                    } else {
+                        console.log('Maintenance mode is DISABLED - site operational');
+                    }
+                } else {
+                    console.warn('Could not load server maintenance status file:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.warn('Error checking server maintenance status:', error);
+            }
+            
+            console.log('No maintenance mode active - site is operational');
+            
         } catch (error) {
-            console.error('Error checking maintenance status:', error);
+            console.error('Error in maintenance check:', error);
         }
     }
     
