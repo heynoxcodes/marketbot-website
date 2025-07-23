@@ -27,30 +27,32 @@ class GlobalAnnouncementSystem {
     }
 
     async fetchAnnouncements() {
-        // Use true global storage if available
-        if (window.trueGlobalStorage) {
-            return await window.trueGlobalStorage.fetchAllAnnouncements();
-        }
-
         try {
-            // Try to fetch from GitHub (static JSON file)
+            // Primary: Use localStorage for reliable storage
+            const stored = localStorage.getItem('marketbot_global_announcements');
+            if (stored) {
+                const announcements = JSON.parse(stored);
+                return this.filterExpiredAnnouncements(announcements);
+            }
+            
+            // Fallback: Try external source
             const response = await fetch(this.baseUrl + '?t=' + Date.now(), {
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             });
 
             if (response.ok) {
                 const announcements = await response.json();
-                return this.filterExpiredAnnouncements(announcements);
+                const filtered = this.filterExpiredAnnouncements(announcements);
+                // Store locally for future use
+                localStorage.setItem('marketbot_global_announcements', JSON.stringify(filtered));
+                return filtered;
             }
         } catch (error) {
-            console.warn('Failed to fetch from server, using local storage');
+            console.warn('Failed to fetch announcements:', error);
         }
 
-        // Fallback to localStorage
-        return this.getFallbackAnnouncements();
+        return [];
     }
 
     filterExpiredAnnouncements(announcements) {
