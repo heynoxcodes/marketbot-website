@@ -399,6 +399,8 @@
         const duration = parseInt(document.getElementById('duration').value);
         const author = document.getElementById('authorName').value.trim();
 
+        console.log('Publishing announcement:', { text, type, duration, author });
+
         if (!text || !author) {
             showError('Please fill in all required fields');
             return;
@@ -410,7 +412,23 @@
         }
 
         try {
-            await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
+            // Try multiple methods to create announcement
+            let announcement;
+            
+            if (window.trueGlobalStorage) {
+                console.log('Using trueGlobalStorage');
+                announcement = await window.trueGlobalStorage.createAnnouncement(text, type, author, duration);
+            } else if (window.parent.globalAnnouncements) {
+                console.log('Using parent globalAnnouncements');
+                announcement = await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
+            } else if (window.globalAnnouncements) {
+                console.log('Using window globalAnnouncements');
+                announcement = await window.globalAnnouncements.createAnnouncement(text, type, author, duration);
+            } else {
+                throw new Error('No announcement system available');
+            }
+            
+            console.log('Announcement created:', announcement);
             
             // Clear form
             document.getElementById('announcementText').value = '';
@@ -421,7 +439,14 @@
             
             // Refresh list
             loadActiveAnnouncements();
+            
+            // Force refresh all page announcements
+            if (window.parent.globalAnnouncements) {
+                window.parent.globalAnnouncements.loadAndDisplayAnnouncements();
+            }
+            
         } catch (error) {
+            console.error('Failed to publish announcement:', error);
             if (error.message.includes('already have an active announcement')) {
                 showError('You can only have one active announcement at a time. Please remove your existing announcement first.');
             } else {
@@ -432,7 +457,22 @@
 
     async function loadActiveAnnouncements() {
         try {
-            const announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
+            let announcements = [];
+            
+            // Try multiple sources for announcements
+            if (window.trueGlobalStorage) {
+                console.log('Loading from trueGlobalStorage');
+                announcements = await window.trueGlobalStorage.fetchAllAnnouncements();
+            } else if (window.parent.globalAnnouncements) {
+                console.log('Loading from parent globalAnnouncements');
+                announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
+            } else if (window.globalAnnouncements) {
+                console.log('Loading from window globalAnnouncements');
+                announcements = await window.globalAnnouncements.fetchAnnouncements();
+            }
+            
+            console.log('Loaded announcements:', announcements);
+            
             const container = document.getElementById('activeAnnouncementsList');
             
             if (announcements.length === 0) {
@@ -453,6 +493,7 @@
                 </div>
             `).join('');
         } catch (error) {
+            console.error('Failed to load announcements:', error);
             showError('Failed to load announcements: ' + error.message);
         }
     }
