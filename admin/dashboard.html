@@ -1,0 +1,523 @@
+<!-- Admin Dashboard Content (loaded after authentication) -->
+<div class="admin-container">
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="admin-title">
+                <img src="../logo.png" alt="MarketBot" class="admin-logo">
+                <h1>MarketBot Admin Dashboard</h1>
+            </div>
+            <button onclick="adminAuth.logout()" class="btn btn-secondary logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="dashboard-section">
+            <h2>Global Announcement System</h2>
+            <p class="section-description">Manage announcements that appear across all MarketBot website pages</p>
+
+            <!-- Create New Announcement -->
+            <div class="announcement-form-container">
+                <h3>Create New Announcement</h3>
+                
+                <div class="form-group">
+                    <label for="announcementText">Announcement Text *</label>
+                    <textarea id="announcementText" rows="3" placeholder="Enter your announcement message..." maxlength="200"></textarea>
+                    <small>Maximum 200 characters</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="announcementType">Type *</label>
+                        <select id="announcementType">
+                            <option value="info">Info (Blue)</option>
+                            <option value="warning">Warning (Red)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Duration (hours) *</label>
+                        <input type="number" id="duration" min="1" max="168" value="24">
+                        <small>1-168 hours</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="authorName">Your Name *</label>
+                    <input type="text" id="authorName" placeholder="Enter your name" maxlength="50">
+                </div>
+
+                <!-- Live Preview -->
+                <div class="preview-section">
+                    <h4>Preview</h4>
+                    <div id="announcementPreview" class="announcement-preview announcement-info">
+                        <div class="announcement-content">
+                            <span class="announcement-icon">ℹ️</span>
+                            <span class="announcement-text">Your announcement will appear here...</span>
+                            <span class="announcement-author">— Your Name</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="publishAnnouncement()" class="btn btn-primary">Publish Global Announcement</button>
+                
+                <div id="publishMessage" class="success-message" style="display: none;">
+                    Announcement published successfully!
+                </div>
+            </div>
+
+            <!-- Active Announcements -->
+            <div class="active-announcements-container">
+                <h3>Active Global Announcements</h3>
+                <div id="activeAnnouncementsList">
+                    <p>Loading announcements...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Admin Sections -->
+        <div class="dashboard-section">
+            <h2>System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>Website Status</h4>
+                    <span class="status-badge status-online">Online</span>
+                </div>
+                <div class="status-item">
+                    <h4>Discord Bot</h4>
+                    <span class="status-badge status-online">Running</span>
+                </div>
+                <div class="status-item">
+                    <h4>Announcement System</h4>
+                    <span class="status-badge status-online">Active</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Dashboard Styles -->
+<style>
+    .admin-container {
+        min-height: 100vh;
+        background: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .admin-header {
+        background: white;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .admin-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .admin-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+    }
+
+    .admin-title h1 {
+        margin: 0;
+        color: #333;
+        font-size: 1.5rem;
+    }
+
+    .logout-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .logout-btn:hover {
+        background: #5a6268;
+    }
+
+    .admin-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .dashboard-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-section h2 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-description {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .announcement-form-container {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        background: #f8f9fa;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .form-group input, 
+    .form-group textarea, 
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    .form-group small {
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    .preview-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: white;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .preview-section h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .announcement-preview {
+        padding: 12px 20px;
+        text-align: center;
+        font-weight: 500;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+
+    .announcement-preview.announcement-warning {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .announcement-preview.announcement-info {
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .announcement-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .announcement-icon {
+        font-size: 16px;
+    }
+
+    .announcement-text {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .announcement-author {
+        opacity: 0.9;
+        font-style: italic;
+        font-size: 0.9em;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 0.75rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+        border: 1px solid #c3e6cb;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+        border: 1px solid #f5c6cb;
+    }
+
+    .active-announcements-container {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        background: white;
+    }
+
+    .announcement-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .announcement-meta {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .status-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+    }
+
+    .status-item h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-online {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    @media (max-width: 768px) {
+        .admin-main {
+            padding: 1rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .admin-title {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    // Dashboard functionality
+    async function publishAnnouncement() {
+        const text = document.getElementById('announcementText').value.trim();
+        const type = document.getElementById('announcementType').value;
+        const duration = parseInt(document.getElementById('duration').value);
+        const author = document.getElementById('authorName').value.trim();
+
+        if (!text || !author) {
+            showError('Please fill in all required fields');
+            return;
+        }
+
+        if (duration < 1 || duration > 168) {
+            showError('Duration must be between 1 and 168 hours');
+            return;
+        }
+
+        try {
+            await window.parent.globalAnnouncements.createAnnouncement(text, type, author, duration);
+            
+            // Clear form
+            document.getElementById('announcementText').value = '';
+            document.getElementById('authorName').value = '';
+            
+            // Show success message
+            showSuccess('Global announcement published successfully!');
+            
+            // Refresh list
+            loadActiveAnnouncements();
+        } catch (error) {
+            if (error.message.includes('already have an active announcement')) {
+                showError('You can only have one active announcement at a time. Please remove your existing announcement first.');
+            } else {
+                showError('Failed to publish announcement: ' + error.message);
+            }
+        }
+    }
+
+    async function loadActiveAnnouncements() {
+        try {
+            const announcements = await window.parent.globalAnnouncements.fetchAnnouncements();
+            const container = document.getElementById('activeAnnouncementsList');
+            
+            if (announcements.length === 0) {
+                container.innerHTML = '<p>No active global announcements</p>';
+                return;
+            }
+
+            container.innerHTML = announcements.map(ann => `
+                <div class="announcement-item">
+                    <div class="announcement-meta">
+                        ${ann.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'} • 
+                        Created: ${new Date(ann.createdAt).toLocaleString()} • 
+                        Expires: ${new Date(ann.expiresAt).toLocaleString()} • 
+                        Author: ${ann.author}
+                    </div>
+                    <div>${ann.text}</div>
+                    <button onclick="removeAnnouncement('${ann.id}')" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
+                </div>
+            `).join('');
+        } catch (error) {
+            showError('Failed to load announcements: ' + error.message);
+        }
+    }
+
+    async function removeAnnouncement(id) {
+        try {
+            await window.parent.globalAnnouncements.deleteAnnouncement(id);
+            showSuccess('Announcement removed successfully!');
+            loadActiveAnnouncements();
+        } catch (error) {
+            showError('Failed to remove announcement: ' + error.message);
+        }
+    }
+
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        
+        const container = document.querySelector('.dashboard-section');
+        container.insertBefore(errorDiv, container.firstChild);
+        
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        
+        const container = document.querySelector('.dashboard-section');
+        container.insertBefore(successDiv, container.firstChild);
+        
+        setTimeout(() => successDiv.remove(), 3000);
+    }
+
+    function updatePreview() {
+        const text = document.getElementById('announcementText').value.trim() || 'Your announcement will appear here...';
+        const type = document.getElementById('announcementType').value;
+        const author = document.getElementById('authorName').value.trim() || 'Your Name';
+
+        const preview = document.getElementById('announcementPreview');
+        const icon = type === 'warning' ? '⚠️' : 'ℹ️';
+        
+        preview.className = `announcement-preview announcement-${type}`;
+        preview.innerHTML = `
+            <div class="announcement-content">
+                <span class="announcement-icon">${icon}</span>
+                <span class="announcement-text">${text}</span>
+                <span class="announcement-author">— ${author}</span>
+            </div>
+        `;
+    }
+
+    // Auto-update preview when typing
+    document.addEventListener('DOMContentLoaded', function() {
+        const textInput = document.getElementById('announcementText');
+        const typeSelect = document.getElementById('announcementType');
+        const authorInput = document.getElementById('authorName');
+
+        if (textInput) textInput.addEventListener('input', updatePreview);
+        if (typeSelect) typeSelect.addEventListener('change', updatePreview);
+        if (authorInput) authorInput.addEventListener('input', updatePreview);
+
+        // Load active announcements
+        loadActiveAnnouncements();
+    });
+</script>
