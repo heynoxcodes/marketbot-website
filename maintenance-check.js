@@ -31,7 +31,12 @@
             // Check global maintenance API
             try {
                 console.log('Checking global maintenance API...');
-                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:3001/maintenance-status?t=` + Date.now(), {
+                const apiUrl = window.location.hostname === 'getmarketbot.store' 
+                    ? 'https://marketbot-maintenance-api.replit.app/maintenance-status'
+                    : `${window.location.protocol}//${window.location.hostname}:3001/maintenance-status`;
+                
+                console.log('Checking maintenance API:', apiUrl);
+                const response = await fetch(apiUrl + '?t=' + Date.now(), {
                     method: 'GET',
                     cache: 'no-cache',
                     headers: {
