@@ -710,91 +710,49 @@ class SecureAdminSystem {
         alert('Server Analytics:\n\nTotal orders: 87\nRevenue this month: $2,847\nTop selling products: Digital templates\nUser retention: 78%');
     }
 
-    async maintenanceMode() {
-        console.log('Maintenance mode button clicked');
+    async enableMaintenance() {
+        console.log('enableMaintenance called');
         
-        try {
-            // Check current global maintenance status
-            let isCurrentlyInMaintenance = false;
-            console.log('Checking current maintenance status...');
+        const customMessage = prompt('Enter maintenance message for ALL visitors worldwide:', 
+            'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!');
+        
+        if (customMessage !== null && customMessage.trim() !== '') {
+            const message = customMessage.trim();
+            const startTime = new Date().toISOString();
+            
+            console.log('Enabling global maintenance mode with message:', message);
             
             try {
-                const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
-                    cache: 'no-cache',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate'
-                    }
-                });
-                
-                console.log('Maintenance status response:', response.status, response.ok);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    isCurrentlyInMaintenance = data.maintenance_enabled === true;
-                    console.log('Current maintenance status:', data);
-                } else {
-                    console.error('Failed to fetch maintenance status:', response.status, response.statusText);
-                    alert('❌ Unable to check current maintenance status. Please try again.');
-                    return;
-                }
+                await this.updateGlobalMaintenanceStatus(true, message, startTime);
+                alert('🔧 GLOBAL Maintenance Mode Activated!\n\n✅ ALL website visitors worldwide will now see the maintenance page.\n✅ Changes are live immediately across all devices and locations.\n\nTest in incognito mode to verify global functionality.');
+                this.updateMaintenanceStatus();
             } catch (error) {
-                console.error('Error checking maintenance status:', error);
-                alert('❌ Network error checking maintenance status. Please check your connection.');
-                return;
+                console.error('Failed to enable maintenance mode:', error);
+                alert('❌ Failed to enable global maintenance mode.\n\nError: ' + error.message + '\n\nCheck console for details.');
             }
+        } else {
+            console.log('User cancelled maintenance mode activation');
+        }
+    }
+    
+    async disableMaintenance() {
+        console.log('disableMaintenance called');
+        
+        const confirmDisable = confirm('Do you want to END maintenance mode?\n\nThis will make the website accessible to all visitors worldwide again.');
+        
+        if (confirmDisable) {
+            console.log('Disabling maintenance mode...');
             
-            const action = isCurrentlyInMaintenance ? 'disable' : 'enable';
-            console.log('Current action needed:', action);
-            
-            if (confirm(`Are you sure you want to ${action} GLOBAL maintenance mode? This will affect ALL website visitors worldwide.`)) {
-                if (isCurrentlyInMaintenance) {
-                    // Disable global maintenance mode
-                    console.log('Disabling global maintenance mode...');
-                    
-                    try {
-                        await this.updateGlobalMaintenanceStatus(false, '', '');
-                        alert('✅ Global maintenance mode disabled. Website is now accessible to all users worldwide.\n\nChanges may take 1-2 minutes to propagate due to CDN caching.');
-                    } catch (error) {
-                        console.error('Failed to disable maintenance mode:', error);
-                        alert('❌ Failed to disable maintenance mode. Error: ' + error.message);
-                        return;
-                    }
-                    
-                } else {
-                    // Enable global maintenance mode
-                    const customMessage = prompt('Enter maintenance message for ALL visitors worldwide:', 
-                        'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!');
-                    
-                    if (customMessage !== null && customMessage.trim() !== '') {
-                        const message = customMessage.trim();
-                        const startTime = new Date().toISOString();
-                        
-                        console.log('Enabling global maintenance mode with message:', message);
-                        
-                        try {
-                            await this.updateGlobalMaintenanceStatus(true, message, startTime);
-                            alert('🔧 GLOBAL Maintenance Mode Activated!\n\n✅ ALL website visitors worldwide will now see the maintenance page.\n✅ Changes are live immediately across all devices and locations.\n\nTest in incognito mode to verify global functionality.');
-                        } catch (error) {
-                            console.error('Failed to enable maintenance mode:', error);
-                            alert('❌ Failed to enable global maintenance mode.\n\nError: ' + error.message + '\n\nCheck console for details.');
-                            return;
-                        }
-                    } else {
-                        console.log('User cancelled maintenance mode activation');
-                        return;
-                    }
-                }
-                
-                // Update dashboard to reflect current state
-                console.log('Updating maintenance status display...');
-                await this.updateMaintenanceStatus();
-            } else {
-                console.log('User cancelled maintenance mode toggle');
+            try {
+                await this.updateGlobalMaintenanceStatus(false, '', '');
+                alert('✅ Maintenance mode disabled!\n\nWebsite is now operational for all visitors worldwide.');
+                this.updateMaintenanceStatus();
+            } catch (error) {
+                console.error('Failed to disable maintenance mode:', error);
+                alert('❌ Failed to disable maintenance mode. Error: ' + error.message);
             }
-            
-        } catch (error) {
-            console.error('Error in maintenanceMode function:', error);
-            alert('❌ Unexpected error toggling maintenance mode: ' + error.message);
+        } else {
+            console.log('User cancelled maintenance mode disable');
         }
     }
     
@@ -878,45 +836,76 @@ class SecureAdminSystem {
         if (!statusElement) return;
         
         try {
-            // Check both global and local maintenance status
-            let isInMaintenance = false;
-            let isGlobal = false;
+            // Check global maintenance API
+            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
             
-            // Check global status first
             try {
-                const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
+                const response = await fetch(apiUrl + '?t=' + Date.now(), {
                     cache: 'no-cache',
                     headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate'
                     }
                 });
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Live maintenance status:', data);
+                    
                     if (data.maintenance_enabled === true) {
-                        isInMaintenance = true;
-                        isGlobal = true;
+                        statusElement.innerHTML = `
+                            <div style="color: #ef4444; font-weight: bold; margin-bottom: 8px;">
+                                🔴 GLOBAL Maintenance Mode: ACTIVE
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">
+                                Message: "${data.message}"
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.8rem;">
+                                Started: ${new Date(data.start_time).toLocaleString()}<br>
+                                Updated: ${new Date(data.updated_at).toLocaleString()}<br>
+                                By: ${data.updated_by}
+                            </div>
+                        `;
+                        statusElement.style.backgroundColor = '#dc26261a';
+                        statusElement.style.border = '1px solid #dc2626';
+                    } else {
+                        statusElement.innerHTML = `
+                            <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">
+                                🟢 Website Status: OPERATIONAL (Global)
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px;">
+                                All systems running normally worldwide
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.8rem;">
+                                Last updated: ${new Date(data.updated_at).toLocaleString()}<br>
+                                By: ${data.updated_by}
+                            </div>
+                        `;
+                        statusElement.style.backgroundColor = '#10b9811a';
+                        statusElement.style.border = '1px solid #10b981';
                     }
+                } else {
+                    throw new Error(`API error: ${response.status}`);
                 }
             } catch (error) {
-                console.error('Error checking global maintenance status:', error);
+                console.error('Error checking global maintenance API:', error);
+                statusElement.innerHTML = `
+                    <div style="color: #f59e0b; font-weight: bold;">
+                        ⚠️ Global API Connection Error
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 5px;">
+                        Unable to fetch live status. Check network connection.
+                    </div>
+                `;
+                statusElement.style.backgroundColor = '#f59e0b1a';
+                statusElement.style.border = '1px solid #f59e0b';
             }
-            
-            // Check local maintenance as fallback
-            if (!isInMaintenance) {
-                isInMaintenance = localStorage.getItem('marketbot_maintenance_mode') === 'true';
-            }
-            
-            if (isInMaintenance) {
-                statusElement.innerHTML = isGlobal ? 
-                    '<span style="color: #f44336;">🔧 Global Maintenance Active</span>' : 
-                    '<span style="color: #ff9800;">🔧 Local Maintenance Active</span>';
-            } else {
-                statusElement.innerHTML = '<span style="color: #4CAF50;">✅ Site Operational</span>';
-            }
-            
         } catch (error) {
-            console.error('Error updating maintenance status:', error);
-            statusElement.innerHTML = '<span style="color: #94A3B8;">❓ Status Unknown</span>';
+            console.error('Error updating maintenance status display:', error);
+            statusElement.innerHTML = `
+                <div style="color: #f59e0b;">
+                    ⚠️ Status Check Error
+                </div>
+            `;
         }
     }
 }
