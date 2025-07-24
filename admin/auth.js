@@ -770,10 +770,25 @@ class SecureAdminSystem {
             
             console.log('Maintenance data to update:', maintenanceData);
             
-            // Update the live maintenance-status.json file via GitHub API
-            console.log('Calling updateMaintenanceFile...');
-            await this.updateMaintenanceFile(maintenanceData);
-            console.log('updateMaintenanceFile completed successfully');
+            // Use the global maintenance API directly
+            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
+            
+            console.log('Using maintenance API:', apiUrl);
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                body: JSON.stringify(maintenanceData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            console.log('Global maintenance API response:', result);
             
             // Also store locally for immediate feedback
             localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
@@ -813,21 +828,10 @@ class SecureAdminSystem {
             const result = await response.json();
             console.log('Global maintenance API response:', result);
             
-            if (result.success) {
-                console.log('Global maintenance status updated successfully');
-                return true;
-            } else {
-                throw new Error('API returned success: false');
-            }
-            
+            return true;
         } catch (error) {
             console.error('Failed to update global maintenance status:', error);
-            
-            // Fallback to localStorage for local testing
-            console.log('Falling back to localStorage for maintenance control...');
-            localStorage.setItem('marketbot_global_maintenance_status', JSON.stringify(data));
-            
-            throw new Error('Global maintenance update failed, using local fallback: ' + error.message);
+            throw new Error('Global maintenance update failed: ' + error.message);
         }
     }
     
