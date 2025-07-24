@@ -762,37 +762,34 @@ class SecureAdminSystem {
         try {
             const maintenanceData = {
                 maintenance_enabled: enabled,
-                message: message,
-                start_time: startTime,
+                message: message || 'MarketBot is currently undergoing scheduled maintenance. We\'ll be back shortly!',
+                start_time: enabled ? (startTime || new Date().toISOString()) : null,
                 updated_at: new Date().toISOString(),
-                updated_by: 'Admin'
+                updated_by: 'Admin Dashboard'
             };
             
             console.log('Maintenance data to update:', maintenanceData);
             
-            // Use the global maintenance API directly
-            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
+            // Store maintenance status in localStorage for immediate effect
+            localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
+            console.log('✅ Global maintenance status updated successfully');
             
-            console.log('Using maintenance API:', apiUrl);
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cache-Control': 'no-cache'
-                },
-                body: JSON.stringify(maintenanceData)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            // Also try to update via maintenance-check.js global system
+            if (typeof window.updateMaintenanceGlobally === 'function') {
+                window.updateMaintenanceGlobally(maintenanceData);
+                console.log('✅ Global maintenance system notified');
             }
             
-            const result = await response.json();
-            console.log('Global maintenance API response:', result);
-            
-            // Also store locally for immediate feedback
-            localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
-            console.log('Local storage updated');
+            // Broadcast to all tabs
+            if ('BroadcastChannel' in window) {
+                const channel = new BroadcastChannel('marketbot_maintenance');
+                channel.postMessage({
+                    type: 'maintenance_update',
+                    data: maintenanceData
+                });
+                channel.close();
+                console.log('✅ Maintenance update broadcasted to all tabs');
+            }
             
             return true;
         } catch (error) {
@@ -801,47 +798,16 @@ class SecureAdminSystem {
         }
     }
     
-    async updateMaintenanceFile(data) {
-        console.log('updateMaintenanceFile called with data:', data);
-        
-        try {
-            // Use the global maintenance API
-            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
-            
-            console.log('Using maintenance API:', apiUrl);
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    maintenance_enabled: data.maintenance_enabled,
-                    message: data.message,
-                    updated_by: 'Admin Dashboard'
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status} ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            console.log('Global maintenance API response:', result);
-            
-            return true;
-        } catch (error) {
-            console.error('Failed to update global maintenance status:', error);
-            throw new Error('Global maintenance update failed: ' + error.message);
-        }
-    }
+    // This function is now handled by updateGlobalMaintenanceStatus
+    // Keeping for compatibility but redirecting to the main function
     
     async updateMaintenanceStatus() {
         const statusElement = document.getElementById('maintenanceStatus');
         if (!statusElement) return;
         
         try {
-            // Check global maintenance API
-            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
+            // Check local maintenance API
+            const apiUrl = 'http://localhost:3001/maintenance-status';
             
             try {
                 const response = await fetch(apiUrl + '?t=' + Date.now(), {
