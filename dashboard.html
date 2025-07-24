@@ -288,7 +288,9 @@
         // Load user data
         async function loadUserData() {
             try {
-                const response = await fetch('/api/user');
+                const response = await fetch('http://localhost:5000/api/user', {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 
                 if (data.success && data.user) {
@@ -311,11 +313,11 @@
                     document.getElementById('serverCount').textContent = user.guilds ? user.guilds.length : 0;
                 } else {
                     // Redirect to login if not authenticated
-                    window.location.href = '/login';
+                    window.location.href = 'https://getmarketbot.store/login.html';
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
-                window.location.href = '/login';
+                window.location.href = 'https://getmarketbot.store/login.html';
             }
         }
         
