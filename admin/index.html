@@ -828,7 +828,7 @@
                     <div class="status-item">
                         <div class="status-title">System Maintenance</div>
                         <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Database and cleanup tools</p>
-                        <button onclick="testMaintenanceButton()" class="btn btn-danger">🔧 Toggle Maintenance</button>
+                        <button onclick="adminSystem.maintenanceMode()" class="btn btn-danger">🔧 Toggle Maintenance</button>
                         <div id="maintenanceStatus" style="margin-top: 10px; font-size: 0.9rem;"></div>
                     </div>
                 </div>
@@ -848,29 +848,18 @@
             console.error('Failed to initialize AdminSystem:', error);
         }
         
-        // Test function for maintenance button
-        function testMaintenanceButton() {
-            console.log('testMaintenanceButton called');
-            console.log('adminSystem:', adminSystem);
-            
-            if (!adminSystem) {
-                alert('❌ Admin system not initialized. Check console for errors.');
-                return;
-            }
-            
-            if (typeof adminSystem.maintenanceMode !== 'function') {
-                alert('❌ maintenanceMode function not found on adminSystem object.');
-                console.log('Available adminSystem methods:', Object.getOwnPropertyNames(adminSystem));
-                return;
-            }
-            
-            try {
-                adminSystem.maintenanceMode();
-            } catch (error) {
-                console.error('Error calling maintenanceMode:', error);
-                alert('❌ Error calling maintenance mode: ' + error.message);
+        // Status update function
+        function updateMaintenanceStatus() {
+            if (adminSystem && typeof adminSystem.updateMaintenanceStatus === 'function') {
+                adminSystem.updateMaintenanceStatus();
             }
         }
+        
+        // Update status every 5 seconds
+        setInterval(updateMaintenanceStatus, 5000);
+        
+        // Initial status update
+        setTimeout(updateMaintenanceStatus, 1000);
     </script>
 </body>
 </html>
