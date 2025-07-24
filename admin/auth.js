@@ -832,10 +832,8 @@ class SecureAdminSystem {
         console.log('updateMaintenanceFile called with data:', data);
         
         try {
-            // Use the global maintenance API running on this server
-            const apiUrl = window.location.hostname === 'getmarketbot.store' 
-                ? 'https://marketbot-maintenance-api.replit.app/maintenance-status'
-                : `${window.location.protocol}//${window.location.hostname}:3001/maintenance-status`;
+            // Use the global maintenance API
+            const apiUrl = 'https://marketbot-maintenance-api.replit.app/maintenance-status';
             
             console.log('Using maintenance API:', apiUrl);
             const response = await fetch(apiUrl, {
