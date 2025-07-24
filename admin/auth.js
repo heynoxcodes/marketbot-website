@@ -773,10 +773,10 @@ class SecureAdminSystem {
                         
                         try {
                             await this.updateGlobalMaintenanceStatus(true, message, startTime);
-                            alert('🔧 Maintenance mode activated locally!\n\nThis will show maintenance mode for visitors on this browser session.\n\nFor true global maintenance, server-side configuration is needed.\n\nTest in incognito mode to verify it works.');
+                            alert('🔧 GLOBAL Maintenance Mode Activated!\n\n✅ ALL website visitors worldwide will now see the maintenance page.\n✅ Changes are live immediately across all devices and locations.\n\nTest in incognito mode to verify global functionality.');
                         } catch (error) {
                             console.error('Failed to enable maintenance mode:', error);
-                            alert('❌ Failed to enable maintenance mode. Error: ' + error.message);
+                            alert('❌ Failed to enable global maintenance mode.\n\nError: ' + error.message + '\n\nCheck console for details.');
                             return;
                         }
                     } else {
@@ -831,24 +831,42 @@ class SecureAdminSystem {
     async updateMaintenanceFile(data) {
         console.log('updateMaintenanceFile called with data:', data);
         
-        // For now, we'll use localStorage as a temporary solution
-        // until we can get proper server-side maintenance control
         try {
-            console.log('Storing maintenance data in localStorage...');
-            localStorage.setItem('marketbot_global_maintenance_status', JSON.stringify(data));
+            // Use the global maintenance API running on this server
+            const response = await fetch(`${window.location.protocol}//${window.location.hostname}:3001/maintenance-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    maintenance_enabled: data.maintenance_enabled,
+                    message: data.message,
+                    updated_by: 'Admin Dashboard'
+                })
+            });
             
-            // Also trigger a page refresh after a short delay to update the maintenance check
-            console.log('Maintenance status updated locally');
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
             
-            // Simulate server update with a timeout
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const result = await response.json();
+            console.log('Global maintenance API response:', result);
             
-            console.log('Maintenance file update completed (local storage)');
-            return true;
+            if (result.success) {
+                console.log('Global maintenance status updated successfully');
+                return true;
+            } else {
+                throw new Error('API returned success: false');
+            }
             
         } catch (error) {
-            console.error('Failed to update maintenance status:', error);
-            throw new Error('Failed to update maintenance status: ' + error.message);
+            console.error('Failed to update global maintenance status:', error);
+            
+            // Fallback to localStorage for local testing
+            console.log('Falling back to localStorage for maintenance control...');
+            localStorage.setItem('marketbot_global_maintenance_status', JSON.stringify(data));
+            
+            throw new Error('Global maintenance update failed, using local fallback: ' + error.message);
         }
     }
     
