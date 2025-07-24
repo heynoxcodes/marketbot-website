@@ -770,25 +770,45 @@ class SecureAdminSystem {
             
             console.log('Maintenance data to update:', maintenanceData);
             
-            // Store maintenance status in localStorage for immediate effect
-            localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
-            console.log('✅ Global maintenance status updated successfully');
+            // Use the GLOBAL maintenance server API
+            const globalApiUrl = 'https://discord-marketplace-bot.replit.app:5000/maintenance-status';
             
-            // Also try to update via maintenance-check.js global system
-            if (typeof window.updateMaintenanceGlobally === 'function') {
-                window.updateMaintenanceGlobally(maintenanceData);
-                console.log('✅ Global maintenance system notified');
+            console.log('🌍 Updating GLOBAL maintenance status via API:', globalApiUrl);
+            const response = await fetch(globalApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                body: JSON.stringify(maintenanceData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Global API error: ${response.status} ${response.statusText}`);
             }
             
-            // Broadcast to all tabs
-            if ('BroadcastChannel' in window) {
-                const channel = new BroadcastChannel('marketbot_maintenance');
-                channel.postMessage({
-                    type: 'maintenance_update',
-                    data: maintenanceData
-                });
-                channel.close();
-                console.log('✅ Maintenance update broadcasted to all tabs');
+            const result = await response.json();
+            console.log('🌍 GLOBAL maintenance API response:', result);
+            
+            if (result.success && result.global) {
+                console.log('✅ GLOBAL maintenance status updated successfully');
+                
+                // Also store locally for immediate UI feedback
+                localStorage.setItem('marketbot_global_maintenance', JSON.stringify(maintenanceData));
+                
+                // Broadcast to all tabs
+                if ('BroadcastChannel' in window) {
+                    const channel = new BroadcastChannel('marketbot_maintenance');
+                    channel.postMessage({
+                        type: 'global_maintenance_update',
+                        data: maintenanceData,
+                        global: true
+                    });
+                    channel.close();
+                    console.log('✅ Global maintenance update broadcasted to all tabs');
+                }
+            } else {
+                throw new Error('Global API returned success: false');
             }
             
             return true;
