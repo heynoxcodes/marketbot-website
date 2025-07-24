@@ -827,9 +827,13 @@
                     </div>
                     <div class="status-item">
                         <div class="status-title">System Maintenance</div>
-                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Database and cleanup tools</p>
-                        <button onclick="adminSystem.maintenanceMode()" class="btn btn-danger">🔧 Toggle Maintenance</button>
-                        <div id="maintenanceStatus" style="margin-top: 10px; font-size: 0.9rem;"></div>
+                        <p style="color: #94A3B8; font-size: 0.875rem; margin: 0.5rem 0;">Global maintenance control</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <button onclick="adminSystem.enableMaintenance()" class="btn btn-danger">🔧 Enable Maintenance</button>
+                            <button onclick="adminSystem.disableMaintenance()" class="btn btn-success">✅ End Maintenance</button>
+                            <button onclick="refreshSystemStatus()" class="btn btn-secondary" style="background: #6b7280;">🔄 Refresh Status</button>
+                        </div>
+                        <div id="maintenanceStatus" style="margin-top: 10px; font-size: 0.9rem; padding: 10px; border-radius: 5px; background: #1e293b;"></div>
                     </div>
                 </div>
             </div>
@@ -855,11 +859,18 @@
             }
         }
         
-        // Update status every 5 seconds
-        setInterval(updateMaintenanceStatus, 5000);
+        // Update status every 10 seconds for live monitoring
+        setInterval(updateMaintenanceStatus, 10000);
         
         // Initial status update
         setTimeout(updateMaintenanceStatus, 1000);
+        
+        // Add manual refresh button functionality
+        window.refreshSystemStatus = function() {
+            if (adminSystem && typeof adminSystem.updateMaintenanceStatus === 'function') {
+                adminSystem.updateMaintenanceStatus();
+            }
+        };
     </script>
 </body>
 </html>
