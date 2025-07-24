@@ -28,7 +28,38 @@
                 }
             }
             
-            // Fallback: Check the live maintenance status file
+            // Check global maintenance API
+            try {
+                console.log('Checking global maintenance API...');
+                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:3001/maintenance-status?t=` + Date.now(), {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Global maintenance status loaded:', data);
+                    
+                    if (data.maintenance_enabled === true) {
+                        console.log('GLOBAL maintenance mode is ENABLED - showing maintenance page');
+                        showMaintenancePage(data.message, data.start_time);
+                        return;
+                    } else {
+                        console.log('Global maintenance mode is DISABLED - site operational');
+                    }
+                } else {
+                    console.warn('Could not load global maintenance status:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.warn('Error checking global maintenance API:', error);
+            }
+            
+            // Fallback: Check the local maintenance status file
             try {
                 const response = await fetch('/maintenance-status.json?t=' + Date.now(), {
                     method: 'GET',
@@ -42,20 +73,18 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Server maintenance status loaded:', data);
+                    console.log('Local maintenance status loaded:', data);
                     
                     if (data.maintenance_enabled === true) {
-                        console.log('Server maintenance mode is ENABLED - showing maintenance page');
+                        console.log('Local maintenance mode is ENABLED - showing maintenance page');
                         showMaintenancePage(data.message, data.start_time);
                         return;
-                    } else {
-                        console.log('Maintenance mode is DISABLED - site operational');
                     }
                 } else {
-                    console.warn('Could not load server maintenance status file:', response.status, response.statusText);
+                    console.warn('Could not load local maintenance status file:', response.status, response.statusText);
                 }
             } catch (error) {
-                console.warn('Error checking server maintenance status:', error);
+                console.warn('Error checking local maintenance status:', error);
             }
             
             console.log('No maintenance mode active - site is operational');
