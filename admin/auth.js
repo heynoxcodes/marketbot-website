@@ -770,8 +770,8 @@ class SecureAdminSystem {
             
             console.log('Maintenance data to update:', maintenanceData);
             
-            // Use the GLOBAL maintenance server API
-            const globalApiUrl = 'https://discord-marketplace-bot.replit.app:5000/maintenance-status';
+            // Use the GLOBAL maintenance server API with correct Replit domain
+            const globalApiUrl = 'https://discord-marketplace-bot-vyxlez.replit.app/maintenance-status';
             
             console.log('🌍 Updating GLOBAL maintenance status via API:', globalApiUrl);
             const response = await fetch(globalApiUrl, {
