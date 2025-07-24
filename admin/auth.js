@@ -833,7 +833,12 @@ class SecureAdminSystem {
         
         try {
             // Use the global maintenance API running on this server
-            const response = await fetch(`${window.location.protocol}//${window.location.hostname}:3001/maintenance-status`, {
+            const apiUrl = window.location.hostname === 'getmarketbot.store' 
+                ? 'https://marketbot-maintenance-api.replit.app/maintenance-status'
+                : `${window.location.protocol}//${window.location.hostname}:3001/maintenance-status`;
+            
+            console.log('Using maintenance API:', apiUrl);
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
