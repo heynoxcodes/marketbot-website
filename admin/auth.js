@@ -883,13 +883,4 @@ class SecureAdminSystem {
             statusElement.style.border = '1px solid #f59e0b';
         }
     }
-        } catch (error) {
-            console.error('Error updating maintenance status display:', error);
-            statusElement.innerHTML = `
-                <div style="color: #f59e0b;">
-                    ⚠️ Status Check Error
-                </div>
-            `;
-        }
-    }
 }
