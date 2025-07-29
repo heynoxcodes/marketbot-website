@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Plans - MarketBot</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid #667eea;
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: "Coming Soon";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .plan-period {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .plan-features li {
+            padding: 10px 0;
+            color: #555;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .plan-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .plan-button:hover {
+            background: #5a6fd8;
+        }
+
+        .plan-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .payment-form {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .payment-form h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #payment-element {
+            margin-bottom: 20px;
+        }
+
+        .submit-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .submit-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-button">← Back to Dashboard</a>
+        
+        <div class="header">
+            <h1>Choose Your Premium Plan</h1>
+            <p>Unlock advanced features for your Discord marketplace</p>
+        </div>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="plan-name">Premium</div>
+                <div class="plan-price">$9.99</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>Advanced Analytics Dashboard</li>
+                    <li>Custom Branding & Themes</li>
+                    <li>Priority Customer Support</li>
+                    <li>Advanced Payment Methods</li>
+                    <li>Custom Product Categories</li>
+                    <li>Order Management Tools</li>
+                </ul>
+                <button class="plan-button" disabled style="background: #6c757d; cursor: not-allowed;">
+                    Coming Soon - Q2 2025 
+                </button>
+            </div>
+
+            <div class="pricing-card featured">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">$24.99</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>Everything in Premium</li>
+                    <li>Multi-Server Management</li>
+                    <li>White-label Solutions</li>
+                    <li>API Access & Webhooks</li>
+                    <li>Advanced Security Features</li>
+                    <li>Dedicated Account Manager</li>
+                    <li>Custom Integrations</li>
+                </ul>
+                <button class="plan-button" disabled style="background: #6c757d; cursor: not-allowed;">
+                    Coming Soon - Q2 2025
+                </button>
+            </div>
+        </div>
+
+        <div class="payment-form" id="payment-form">
+            <h3>Complete Your Purchase</h3>
+            <div id="selected-plan-info"></div>
+            <form id="payment-form-element">
+                <div id="payment-element">
+                    <!-- Stripe Elements will create form elements here -->
+                </div>
+                <button type="submit" class="submit-button" id="submit-button">
+                    <span id="button-text">Subscribe Now</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div>Processing your payment...</div>
+        </div>
+
+        <div class="success-message" id="success-message">
+            <h3>Payment Successful!</h3>
+            <p>Welcome to MarketBot Premium! Your subscription is now active.</p>
+        </div>
+
+        <div class="error-message" id="error-message">
+            <h3>Payment Failed</h3>
+            <p id="error-text">There was an error processing your payment. Please try again.</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe(window.STRIPE_PUBLIC_KEY || 'pk_test_default');
+        let elements;
+        let selectedPlan = null;
+
+        // Load Stripe public key from environment
+        fetch('/api/stripe-config')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.STRIPE_PUBLIC_KEY = data.publicKey;
+                }
+            })
+            .catch(console.error);
+
+        async function selectPlan(planName, price, priceId) {
+            selectedPlan = { name: planName, price: price, priceId: priceId };
+            
+            // Show selected plan info
+            document.getElementById('selected-plan-info').innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong>${planName.charAt(0).toUpperCase() + planName.slice(1)} Plan</strong><br>
+                    $${price}/month
+                </div>
+            `;
+
+            // Show payment form
+            document.getElementById('payment-form').style.display = 'block';
+            
+            // Scroll to payment form
+            document.getElementById('payment-form').scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                // Create subscription
+                const response = await fetch('/api/create-subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plan: planName,
+                        priceId: priceId
+                    }),
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+
+                // Initialize Stripe Elements
+                const clientSecret = result.clientSecret;
+                elements = stripe.elements({ clientSecret });
+
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            }
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (!stripe || !elements) {
+                return;
+            }
+
+            setLoading(true);
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: window.location.origin + '/dashboard?payment=success',
+                },
+            });
+
+            if (error) {
+                if (error.type === "card_error" || error.type === "validation_error") {
+                    showError(error.message);
+                } else {
+                    showError("An unexpected error occurred.");
+                }
+            }
+
+            setLoading(false);
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                document.getElementById('submit-button').disabled = true;
+                document.getElementById('button-text').textContent = 'Processing...';
+                document.getElementById('loading').style.display = 'block';
+            } else {
+                document.getElementById('submit-button').disabled = false;
+                document.getElementById('button-text').textContent = 'Subscribe Now';
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('error-message').style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess() {
+            document.getElementById('success-message').style.display = 'block';
+            document.getElementById('payment-form').style.display = 'none';
+        }
+
+        // Handle form submission
+        document.getElementById('payment-form-element').addEventListener('submit', handleSubmit);
+
+        // Check for successful payment in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payment') === 'success') {
+            showSuccess();
+        }
+    </script>
+</body>
+</html>
