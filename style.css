@@ -720,7 +720,7 @@ body {
 }
 
 /* Coming Soon Overlay */
-.pricing-card.coming-soon {
+.pricing-card.coming-soon:not(.featured) {
     position: relative;
     overflow: hidden;
 }
