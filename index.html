@@ -37,6 +37,18 @@
 </head>
 <body>
     <!-- Announcement Banner Container -->
+
+
+    <div id="offlineModal" class="modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999;">
+  <div style="background: #1f1f1f; padding: 20px 30px; border-radius: 12px; max-width: 400px; text-align: center; color: white;">
+    <h2 style="color: #ff4d4f;">⚠ Bot Offline</h2>
+    <p>MarketBot is currently under maintenance. We're working to restore service as soon as possible.</p>
+    <button onclick="document.getElementById('offlineModal').style.display='none'" style="margin-top: 15px; padding: 8px 16px; background: #ff4d4f; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      Close
+    </button>
+  </div>
+</div>
+    
     <div id="announcement-banner"></div>
 
     <!-- Navigation -->
